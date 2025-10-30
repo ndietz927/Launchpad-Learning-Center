@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teacher Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #0d0d0d;
+        color: #fff;
+        min-height: 100vh;
+        padding-top: 130px; /* ⬆️ Increased to fully show title */
+      }
+      .navbar {
+        background-color: #1a1a1a !important;
+        box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
+      }
+      .navbar-brand img {
+        width: 120px;
+        margin-right: 14px;
+      }
+      .card {
+        background: #1c1c1c;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
+        color: #fff;
+      }
+      label {
+        color: #ffb199;
+        font-weight: 500;
+      }
+      input,
+      select {
+        background-color: #2b2b2b !important;
+        color: #fff !important;
+        border: 1px solid #444 !important;
+      }
+      input::placeholder {
+        color: #aaa;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        border: none;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #dd2476, #ff512f);
+      }
+      .btn-danger {
+        background: #c62828;
+        border: none;
+      }
+      .btn-danger:hover {
+        background: #b71c1c;
+      }
+      .btn-outline-light {
+        border-color: #ff8a65;
+        color: #ff8a65;
+      }
+      .btn-outline-light:hover {
+        background-color: #ff8a65;
+        color: #fff;
+      }
+      .class-code-box {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #ff8a65;
+        background-color: #2b2b2b;
+        border-radius: 10px;
+        padding: 10px;
+        letter-spacing: 2px;
+        margin-top: 10px;
+      }
+      .section-divider {
+        border-top: 1px solid #ff8a65;
+        margin: 40px 0;
+        opacity: 0.6;
+      }
+      .class-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .class-item {
+        background-color: #2b2b2b;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-left: 4px solid #ff8a65;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .class-info {
+        flex: 1;
+      }
+      .class-item strong {
+        color: #ffb199;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <img src="Launchpad Learning Center.png" alt="Logo" />
+          <span class="fw-bold fs-4">Launchpad Teacher Dashboard</span>
+        </a>
+        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container d-flex flex-column align-items-center">
+      <div class="col-md-6 mt-3">
+        <!-- Teacher Profile Card -->
+        <div class="card p-4 text-center mb-4">
+          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Teacher Profile</h3>
+          <p id="userEmail" class="text-muted mb-4"></p>
+
+          <form id="teacherProfileForm" class="text-start">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="title">Courtesy Title</label>
+                <select id="title" class="form-select" required>
+                  <option value="" disabled selected>Select</option>
+                  <option>Mr.</option>
+                  <option>Ms.</option>
+                  <option>Mrs.</option>
+                  <option>Dr.</option>
+                  <option>Prof.</option>
+                </select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="firstName">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  class="form-control"
+                  placeholder="First Name"
+                  required
+                />
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="lastName">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  class="form-control"
+                  placeholder="Last Name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-3">
+              <button type="submit" class="btn btn-primary">Save Profile</button>
+            </div>
+          </form>
+          <div id="profileStatus" class="mt-3 text-success fw-bold"></div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Class Creation Card -->
+        <div class="card p-4 text-center mb-4">
+          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Create a New Class</h3>
+
+          <form id="createClassForm" class="text-start">
+            <div class="mb-3">
+              <label for="className">Class Name</label>
+              <input
+                type="text"
+                id="className"
+                class="form-control"
+                placeholder="Enter class name"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label>Generated Class Code</label>
+              <div id="classCodeDisplay" class="class-code-box">Click Generate</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <button type="button" id="generateCodeBtn" class="btn btn-outline-light">
+                Generate Code
+              </button>
+              <button type="submit" id="saveClassBtn" class="btn btn-primary">
+                Save Class
+              </button>
+            </div>
+          </form>
+
+          <div id="classStatusMessage" class="mt-3 text-success fw-bold"></div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- My Classes List -->
+        <div class="card p-4 text-center">
+          <h3 class="fw-bold mb-3" style="color: #ff8a65;">My Classes</h3>
+          <div id="classList" class="class-list text-start"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase Script -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+        getDoc,
+        collection,
+        query,
+        where,
+        onSnapshot,
+        deleteDoc
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+        authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+        projectId: "simpleloginapp-a7b53",
+        storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+        messagingSenderId: "410260892945",
+        appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      const userEmail = document.getElementById("userEmail");
+      const teacherProfileForm = document.getElementById("teacherProfileForm");
+      const profileStatus = document.getElementById("profileStatus");
+      const classCodeDisplay = document.getElementById("classCodeDisplay");
+      const generateCodeBtn = document.getElementById("generateCodeBtn");
+      const createClassForm = document.getElementById("createClassForm");
+      const classStatusMessage = document.getElementById("classStatusMessage");
+      const classList = document.getElementById("classList");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      let currentCode = "";
+
+      function generateCode() {
+        return Math.floor(10000000 + Math.random() * 90000000).toString();
+      }
+
+      async function generateUniqueCode() {
+        let unique = false;
+        let code;
+        while (!unique) {
+          code = generateCode();
+          const docRef = doc(db, "classes", code);
+          const docSnap = await getDoc(docRef);
+          if (!docSnap.exists()) unique = true;
+        }
+        return code;
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        userEmail.textContent = `Logged in as: ${user.email}`;
+
+        const profileRef = doc(db, "teacherProfiles", user.uid);
+        const profileSnap = await getDoc(profileRef);
+        if (profileSnap.exists()) {
+          const data = profileSnap.data();
+          document.getElementById("title").value = data.title || "";
+          document.getElementById("firstName").value = data.firstName || "";
+          document.getElementById("lastName").value = data.lastName || "";
+        }
+
+        const classesRef = collection(db, "classes");
+        const q = query(classesRef, where("teacherEmail", "==", user.email));
+        onSnapshot(q, (snapshot) => {
+          classList.innerHTML = "";
+          if (snapshot.empty) {
+            classList.innerHTML =
+              '<p class="text-muted text-center">No classes created yet.</p>';
+            return;
+          }
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const div = document.createElement("div");
+            div.classList.add("class-item");
+            div.innerHTML = `
+              <div class="class-info">
+                <strong>${data.name}</strong><br />
+                Code: <span class="text-warning">${data.code}</span><br />
+                <small>Created: ${new Date(data.createdAt).toLocaleString()}</small>
+              </div>
+              <div class="d-flex flex-column gap-2">
+                <button class="btn btn-sm btn-outline-light view-class-btn" data-id="${data.code}">
+                  View Class
+                </button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${data.code}">
+                  Delete
+                </button>
+              </div>
+            `;
+            classList.appendChild(div);
+          });
+
+          // Delete buttons
+          document.querySelectorAll(".delete-btn").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
+              const code = e.target.getAttribute("data-id");
+              if (confirm(`Are you sure you want to delete class ${code}?`)) {
+                await deleteDoc(doc(db, "classes", code));
+              }
+            });
+          });
+
+          // View Class buttons
+          document.querySelectorAll(".view-class-btn").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const code = e.target.getAttribute("data-id");
+              window.location.href = `class.html?code=${code}`;
+            });
+          });
+        });
+      });
+
+      teacherProfileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const title = document.getElementById("title").value;
+        const firstName = document.getElementById("firstName").value;
+        const lastName = document.getElementById("lastName").value;
+
+        await setDoc(doc(db, "teacherProfiles", user.uid), {
+          title,
+          firstName,
+          lastName,
+          email: user.email,
+        });
+
+        profileStatus.textContent = "✅ Profile saved successfully!";
+      });
+
+      generateCodeBtn.addEventListener("click", async () => {
+        currentCode = await generateUniqueCode();
+        classCodeDisplay.textContent = currentCode;
+      });
+
+      createClassForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const className = document.getElementById("className").value.trim();
+        if (!currentCode) {
+          alert("Please generate a class code first.");
+          return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        await setDoc(doc(db, "classes", currentCode), {
+          name: className,
+          code: currentCode,
+          teacherEmail: user.email,
+          createdAt: new Date().toISOString(),
+        });
+
+        classStatusMessage.textContent = `✅ Class "${className}" created successfully!`;
+        createClassForm.reset();
+        classCodeDisplay.textContent = "Click Generate";
+      });
+
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "index.html";
+      });
+    </script>
+  </body>
+</html>
