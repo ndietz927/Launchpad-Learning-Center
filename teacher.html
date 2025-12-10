@@ -16,7 +16,7 @@
         background-color: #0d0d0d;
         color: #fff;
         min-height: 100vh;
-        padding-top: 130px; /* ⬆️ Increased to fully show title */
+        padding-top: 130px;
       }
       .navbar {
         background-color: #1a1a1a !important;
@@ -117,7 +117,6 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container d-flex flex-column align-items-center">
       <div class="col-md-6 mt-3">
         <!-- Teacher Profile Card -->
@@ -274,6 +273,11 @@
         return code;
       }
 
+      // Open class.html with code
+      function viewClass(classCode) {
+        window.location.href = `class.html?code=${classCode}`;
+      }
+
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
           window.location.href = "index.html";
@@ -282,6 +286,7 @@
 
         userEmail.textContent = `Logged in as: ${user.email}`;
 
+        // Load teacher profile
         const profileRef = doc(db, "teacherProfiles", user.uid);
         const profileSnap = await getDoc(profileRef);
         if (profileSnap.exists()) {
@@ -291,6 +296,7 @@
           document.getElementById("lastName").value = data.lastName || "";
         }
 
+        // Load classes
         const classesRef = collection(db, "classes");
         const q = query(classesRef, where("teacherEmail", "==", user.email));
         onSnapshot(q, (snapshot) => {
@@ -300,6 +306,7 @@
               '<p class="text-muted text-center">No classes created yet.</p>';
             return;
           }
+
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement("div");
@@ -310,13 +317,9 @@
                 Code: <span class="text-warning">${data.code}</span><br />
                 <small>Created: ${new Date(data.createdAt).toLocaleString()}</small>
               </div>
-              <div class="d-flex flex-column gap-2">
-                <button class="btn btn-sm btn-outline-light view-class-btn" data-id="${data.code}">
-                  View Class
-                </button>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="${data.code}">
-                  Delete
-                </button>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-light" onclick="viewClass('${data.code}')">View Class</button>
+                <button class="btn btn-sm btn-danger delete-btn" data-id="${data.code}">Delete</button>
               </div>
             `;
             classList.appendChild(div);
@@ -329,14 +332,6 @@
               if (confirm(`Are you sure you want to delete class ${code}?`)) {
                 await deleteDoc(doc(db, "classes", code));
               }
-            });
-          });
-
-          // View Class buttons
-          document.querySelectorAll(".view-class-btn").forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-              const code = e.target.getAttribute("data-id");
-              window.location.href = `class.html?code=${code}`;
             });
           });
         });
@@ -387,6 +382,7 @@
         classStatusMessage.textContent = `✅ Class "${className}" created successfully!`;
         createClassForm.reset();
         classCodeDisplay.textContent = "Click Generate";
+        currentCode = ""; // reset code after saving
       });
 
       logoutBtn.addEventListener("click", async () => {
