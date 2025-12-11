@@ -1,130 +1,160 @@
-<script type="module">
-    // ------------------ FIREBASE INIT ------------------
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-        getFirestore, collection, addDoc,
-        onSnapshot, doc, updateDoc, deleteDoc
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    // ---- YOUR FIREBASE CONFIG ----
-    const firebaseConfig = {
-        apiKey: "YOUR_KEY",
-        authDomain: "YOUR_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_BUCKET",
-        messagingSenderId: "YOUR_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const contentRef = collection(db, "classContent");
-
-    // ------------------ SAVE CONTENT ------------------
-    window.saveContent = async function () {
-        const type = document.getElementById("contentType").value;
-        const title = document.getElementById("title").value.trim();
-        const description = document.getElementById("description").value.trim();
-        const dueDateInput = document.getElementById("dueDate").value;
-
-        if (title === "" || description === "") {
-            alert("Please fill in the title and description.");
-            return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Content</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f2f5;
         }
+        h1 {
+            text-align: center;
+        }
+        form {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .assignment {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 10px auto;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .assignment h3 {
+            margin: 0;
+        }
+        .assignment p {
+            margin: 5px 0;
+        }
+        .assignment small {
+            color: #666;
+        }
+        .actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .actions button {
+            background-color: #dc3545;
+            margin-left: 5px;
+        }
+        .actions button.edit {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
 
-        const dueDate = type === "assignment" ? dueDateInput : "";
+    <h1>Class Content</h1>
 
-        try {
-            await addDoc(contentRef, {
-                type,
-                title,
-                description,
-                dueDate,
-                timestamp: Date.now()
+    <form id="assignmentForm">
+        <input type="hidden" id="editIndex">
+        <input type="text" id="title" placeholder="Assignment Title" required>
+        <textarea id="description" placeholder="Assignment Description" required></textarea>
+        <input type="date" id="dueDate" required>
+        <button type="submit">Add Assignment</button>
+    </form>
+
+    <div id="assignmentsContainer"></div>
+
+    <script>
+        const form = document.getElementById('assignmentForm');
+        const assignmentsContainer = document.getElementById('assignmentsContainer');
+
+        let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+
+        function renderAssignments() {
+            assignmentsContainer.innerHTML = '';
+            assignments.forEach((assignment, index) => {
+                const div = document.createElement('div');
+                div.className = 'assignment';
+                div.innerHTML = `
+                    <h3>${assignment.title}</h3>
+                    <p>${assignment.description}</p>
+                    <small>Due: ${assignment.dueDate}</small>
+                    <div class="actions">
+                        <button class="edit">Edit</button>
+                        <button class="delete">Delete</button>
+                    </div>
+                `;
+                const editBtn = div.querySelector('.edit');
+                const deleteBtn = div.querySelector('.delete');
+
+                editBtn.addEventListener('click', () => editAssignment(index));
+                deleteBtn.addEventListener('click', () => deleteAssignment(index));
+
+                assignmentsContainer.appendChild(div);
             });
-
-            // CLEAR FIELDS
-            document.getElementById("title").value = "";
-            document.getElementById("description").value = "";
-            document.getElementById("dueDate").value = "";
-
-        } catch (err) {
-            console.error("ERROR SAVING:", err);
         }
-    };
 
-    // ------------------ DISPLAY CONTENT ------------------
-    onSnapshot(contentRef, (snapshot) => {
-        const list = document.getElementById("contentList");
-        list.innerHTML = "";
+        function addAssignment(e) {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const editIndex = document.getElementById('editIndex').value;
 
-        snapshot.forEach((docSnap) => {
-            const item = docSnap.data();
-            const id = docSnap.id;
+            if (editIndex === '') {
+                // Add new
+                assignments.push({ title, description, dueDate });
+            } else {
+                // Edit existing
+                assignments[editIndex] = { title, description, dueDate };
+            }
 
-            const div = document.createElement("div");
-            div.className = "item";
-
-            div.innerHTML = `
-                <h3>${item.title}</h3>
-                <p>${item.description}</p>
-                ${item.type === "assignment" && item.dueDate ? `<small>Due: ${item.dueDate}</small>` : ""}
-                <div class="actions">
-                    <button class="edit-btn" onclick="editItem('${id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteItem('${id}')">Delete</button>
-                </div>
-            `;
-
-            list.appendChild(div);
-        });
-    });
-
-    // ------------------ EDIT CONTENT ------------------
-    window.editItem = function (id) {
-        const docRef = doc(db, "classContent", id);
-
-        // Load data to form
-        const itemBox = document.querySelector(`button[onclick="editItem('${id}')"]`).parentElement.parentElement;
-
-        const title = itemBox.querySelector("h3").innerText;
-        const description = itemBox.querySelector("p").innerText;
-        const dueText = itemBox.querySelector("small")?.innerText || "";
-        const dueDate = dueText.replace("Due: ", "");
-
-        document.getElementById("title").value = title;
-        document.getElementById("description").value = description;
-        document.getElementById("dueDate").value = dueDate;
-
-        // Override save button for editing
-        window.saveContent = async function () {
-            const newTitle = document.getElementById("title").value.trim();
-            const newDesc = document.getElementById("description").value.trim();
-            const newDue = document.getElementById("dueDate").value;
-
-            await updateDoc(docRef, {
-                title: newTitle,
-                description: newDesc,
-                dueDate: newDue
-            });
-
-            // Restore normal behavior
-            location.reload();
-        };
-    };
-
-    // ------------------ DELETE CONTENT ------------------
-    window.deleteItem = async function (id) {
-        if (confirm("Delete this item?")) {
-            await deleteDoc(doc(db, "classContent", id));
+            localStorage.setItem('assignments', JSON.stringify(assignments));
+            form.reset();
+            document.getElementById('editIndex').value = '';
+            renderAssignments();
         }
-    };
 
-    // ------------------ SET CLASS NAME ------------------
-    window.setClassName = function () {
-        const name = document.getElementById("classNameInput").value.trim();
-        if (name === "") return;
-        document.title = name;
-        document.getElementById("classHeader").textContent = name;
-    };
-</script>
+        function editAssignment(index) {
+            const assignment = assignments[index];
+            document.getElementById('title').value = assignment.title;
+            document.getElementById('description').value = assignment.description;
+            document.getElementById('dueDate').value = assignment.dueDate;
+            document.getElementById('editIndex').value = index;
+        }
+
+        function deleteAssignment(index) {
+            if (confirm('Are you sure you want to delete this assignment?')) {
+                assignments.splice(index, 1);
+                localStorage.setItem('assignments', JSON.stringify(assignments));
+                renderAssignments();
+            }
+        }
+
+        form.addEventListener('submit', addAssignment);
+
+        renderAssignments();
+    </script>
+
+</body>
+</html>
