@@ -1,160 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Content</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f2f5;
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin: 0 auto 20px auto;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-        input, textarea, button {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .assignment {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin: 10px auto;
-            box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        .assignment h3 {
-            margin: 0;
-        }
-        .assignment p {
-            margin: 5px 0;
-        }
-        .assignment small {
-            color: #666;
-        }
-        .actions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        .actions button {
-            background-color: #dc3545;
-            margin-left: 5px;
-        }
-        .actions button.edit {
-            background-color: #ffc107;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loading...</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f0f2f5;
+    }
+    h1 {
+        text-align: center;
+    }
+    .form-box, .content-box {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        max-width: 700px;
+        margin: 20px auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, select, button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .item {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .item h3 {
+        margin: 0;
+    }
+    .item small {
+        color: #666;
+    }
+    .actions {
+        margin-top: 10px;
+    }
+    .actions button {
+        width: auto;
+        padding: 5px 10px;
+        margin-right: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .edit-btn {
+        background-color: #ffc107;
+    }
+    .delete-btn {
+        background-color: #dc3545;
+        color: white;
+    }
+</style>
 </head>
 <body>
 
-    <h1>Class Content</h1>
+<h1 id="classHeader">Loading...</h1>
 
-    <form id="assignmentForm">
-        <input type="hidden" id="editIndex">
-        <input type="text" id="title" placeholder="Assignment Title" required>
-        <textarea id="description" placeholder="Assignment Description" required></textarea>
-        <input type="date" id="dueDate" required>
-        <button type="submit">Add Assignment</button>
-    </form>
+<div class="form-box">
+    <h2>Create Assignment / Post</h2>
+    <select id="contentType">
+        <option value="assignment">Assignment</option>
+        <option value="post">Post</option>
+    </select>
+    <input type="text" id="title" placeholder="Title" required />
+    <textarea id="description" placeholder="Description" required></textarea>
+    <input type="date" id="dueDate" />
+    <button id="saveBtn">Upload</button>
+</div>
 
-    <div id="assignmentsContainer"></div>
+<div class="content-box">
+    <h2>Class Content</h2>
+    <div id="contentList"></div>
+</div>
 
-    <script>
-        const form = document.getElementById('assignmentForm');
-        const assignmentsContainer = document.getElementById('assignmentsContainer');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+    getFirestore, collection, doc, addDoc, onSnapshot,
+    updateDoc, deleteDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
+// ----- Firebase Config -----
+const firebaseConfig = {
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_BUCKET",
+    messagingSenderId: "YOUR_ID",
+    appId: "YOUR_APP_ID"
+};
 
-        function renderAssignments() {
-            assignmentsContainer.innerHTML = '';
-            assignments.forEach((assignment, index) => {
-                const div = document.createElement('div');
-                div.className = 'assignment';
-                div.innerHTML = `
-                    <h3>${assignment.title}</h3>
-                    <p>${assignment.description}</p>
-                    <small>Due: ${assignment.dueDate}</small>
-                    <div class="actions">
-                        <button class="edit">Edit</button>
-                        <button class="delete">Delete</button>
-                    </div>
-                `;
-                const editBtn = div.querySelector('.edit');
-                const deleteBtn = div.querySelector('.delete');
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-                editBtn.addEventListener('click', () => editAssignment(index));
-                deleteBtn.addEventListener('click', () => deleteAssignment(index));
+// ----- Get class code from URL -----
+const urlParams = new URLSearchParams(window.location.search);
+const classCode = urlParams.get("code");
+if (!classCode) alert("No class code provided.");
 
-                assignmentsContainer.appendChild(div);
-            });
-        }
+// ----- Load class name -----
+const classRef = doc(db, "classes", classCode);
+const classHeader = document.getElementById("classHeader");
 
-        function addAssignment(e) {
-            e.preventDefault();
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
-            const dueDate = document.getElementById('dueDate').value;
-            const editIndex = document.getElementById('editIndex').value;
+async function loadClassName() {
+    const classSnap = await getDoc(classRef);
+    if (classSnap.exists()) {
+        const classData = classSnap.data();
+        document.title = classData.name;
+        classHeader.textContent = classData.name;
+    } else {
+        classHeader.textContent = "Class Not Found";
+    }
+}
+loadClassName();
 
-            if (editIndex === '') {
-                // Add new
-                assignments.push({ title, description, dueDate });
-            } else {
-                // Edit existing
-                assignments[editIndex] = { title, description, dueDate };
+// ----- References -----
+const contentRef = collection(db, "classContent");
+
+// ----- Elements -----
+const titleInput = document.getElementById("title");
+const descriptionInput = document.getElementById("description");
+const dueDateInput = document.getElementById("dueDate");
+const contentTypeSelect = document.getElementById("contentType");
+const contentList = document.getElementById("contentList");
+const saveBtn = document.getElementById("saveBtn");
+
+let editId = null;
+
+// ----- Load Content -----
+onSnapshot(collection(db, "classContent"), (snapshot) => {
+    contentList.innerHTML = "";
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.classCode !== classCode) return; // Only this class
+        const id = docSnap.id;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+            <h3>${data.title}</h3>
+            <p>${data.description}</p>
+            ${data.type === "assignment" && data.dueDate ? `<small>Due: ${data.dueDate}</small>` : ""}
+            <div class="actions">
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            </div>
+        `;
+        const editBtn = div.querySelector(".edit-btn");
+        const deleteBtn = div.querySelector(".delete-btn");
+
+        editBtn.addEventListener("click", () => {
+            titleInput.value = data.title;
+            descriptionInput.value = data.description;
+            dueDateInput.value = data.dueDate || "";
+            contentTypeSelect.value = data.type;
+            editId = id;
+        });
+
+        deleteBtn.addEventListener("click", async () => {
+            if (confirm("Delete this item?")) {
+                await deleteDoc(doc(db, "classContent", id));
             }
+        });
 
-            localStorage.setItem('assignments', JSON.stringify(assignments));
-            form.reset();
-            document.getElementById('editIndex').value = '';
-            renderAssignments();
-        }
+        contentList.appendChild(div);
+    });
+});
 
-        function editAssignment(index) {
-            const assignment = assignments[index];
-            document.getElementById('title').value = assignment.title;
-            document.getElementById('description').value = assignment.description;
-            document.getElementById('dueDate').value = assignment.dueDate;
-            document.getElementById('editIndex').value = index;
-        }
+// ----- Save / Edit Content -----
+saveBtn.addEventListener("click", async () => {
+    const type = contentTypeSelect.value;
+    const title = titleInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const dueDate = type === "assignment" ? dueDateInput.value : "";
 
-        function deleteAssignment(index) {
-            if (confirm('Are you sure you want to delete this assignment?')) {
-                assignments.splice(index, 1);
-                localStorage.setItem('assignments', JSON.stringify(assignments));
-                renderAssignments();
-            }
-        }
+    if (!title || !description) return alert("Please fill title and description.");
 
-        form.addEventListener('submit', addAssignment);
+    if (editId) {
+        // Update existing
+        await updateDoc(doc(db, "classContent", editId), { title, description, dueDate, type });
+        editId = null;
+    } else {
+        // Add new
+        await addDoc(contentRef, {
+            classCode,
+            type,
+            title,
+            description,
+            dueDate,
+            timestamp: Date.now()
+        });
+    }
 
-        renderAssignments();
-    </script>
+    titleInput.value = "";
+    descriptionInput.value = "";
+    dueDateInput.value = "";
+    contentTypeSelect.value = "assignment";
+});
+</script>
 
 </body>
 </html>
