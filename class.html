@@ -124,25 +124,16 @@ const saveBtn = document.getElementById("saveBtn");
 
 let editId = null;
 
-// ----- Initialize Class Page -----
-async function initClassPage() {
-    const user = auth.currentUser;
-    if (user) {
-        // User already signed in
-        await loadClassName();
-        loadClassContent();
-    } else {
-        // Wait for auth state
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = "index.html"; // Not logged in
-                return;
-            }
-            await loadClassName();
-            loadClassContent();
-        });
+// ----- Authentication & Load Page -----
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "index.html"; // redirect if not logged in
+        return;
     }
-}
+    // User is logged in, safe to load class
+    await loadClassName();
+    loadClassContent();
+});
 
 // ----- Load class name -----
 async function loadClassName() {
@@ -238,10 +229,6 @@ saveBtn.addEventListener("click", async () => {
         alert("Failed to save. Check console for details.");
     }
 });
-
-// ----- Start the page -----
-initClassPage();
-
 </script>
 </body>
 </html>
