@@ -124,16 +124,25 @@ const saveBtn = document.getElementById("saveBtn");
 
 let editId = null;
 
-// ----- Authentication & Load Class -----
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = "index.html"; // Not logged in
-        return;
+// ----- Initialize Class Page -----
+async function initClassPage() {
+    const user = auth.currentUser;
+    if (user) {
+        // User already signed in
+        await loadClassName();
+        loadClassContent();
+    } else {
+        // Wait for auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html"; // Not logged in
+                return;
+            }
+            await loadClassName();
+            loadClassContent();
+        });
     }
-
-    await loadClassName();
-    loadClassContent();
-});
+}
 
 // ----- Load class name -----
 async function loadClassName() {
@@ -229,7 +238,10 @@ saveBtn.addEventListener("click", async () => {
         alert("Failed to save. Check console for details.");
     }
 });
-</script>
 
+// ----- Start the page -----
+initClassPage();
+
+</script>
 </body>
 </html>
