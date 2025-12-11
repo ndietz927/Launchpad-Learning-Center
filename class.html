@@ -5,68 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Loading...</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        background-color: #f0f2f5;
-    }
-    h1 {
-        text-align: center;
-    }
-    .form-box, .content-box {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        max-width: 700px;
-        margin: 20px auto;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, textarea, select, button {
-        width: 100%;
-        padding: 8px;
-        margin-top: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-    }
-    button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-    .item {
-        padding: 15px;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 10px;
-        position: relative;
-    }
-    .item h3 {
-        margin: 0;
-    }
-    .item small {
-        color: #666;
-    }
-    .actions {
-        margin-top: 10px;
-    }
-    .actions button {
-        width: auto;
-        padding: 5px 10px;
-        margin-right: 5px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .edit-btn {
-        background-color: #ffc107;
-    }
-    .delete-btn {
-        background-color: #dc3545;
-        color: white;
-    }
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f0f2f5;
+}
+h1 {
+    text-align: center;
+}
+.form-box, .content-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 700px;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+input, textarea, select, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover { background-color: #0056b3; }
+.item {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    position: relative;
+}
+.item h3 { margin: 0; }
+.item small { color: #666; }
+.actions {
+    margin-top: 10px;
+}
+.actions button {
+    width: auto;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.edit-btn { background-color: #ffc107; }
+.delete-btn { background-color: #dc3545; color: white; }
 </style>
 </head>
 <body>
@@ -96,6 +85,7 @@ import {
     getFirestore, collection, doc, addDoc, onSnapshot,
     updateDoc, deleteDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // ----- Firebase Config -----
 const firebaseConfig = {
@@ -109,27 +99,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ----- Get class code from URL -----
 const urlParams = new URLSearchParams(window.location.search);
 const classCode = urlParams.get("code");
-if (!classCode) alert("No class code provided.");
-
-// ----- Load class name -----
-const classRef = doc(db, "classes", classCode);
 const classHeader = document.getElementById("classHeader");
 
-async function loadClassName() {
-    const classSnap = await getDoc(classRef);
-    if (classSnap.exists()) {
-        const classData = classSnap.data();
-        document.title = classData.name;
-        classHeader.textContent = classData.name;
-    } else {
-        classHeader.textContent = "Class Not Found";
-    }
+if (!classCode) {
+    classHeader.textContent = "No Class Code Provided";
+    document.title = "Class Not Found";
 }
-loadClassName();
 
 // ----- References -----
 const contentRef = collection(db, "classContent");
@@ -144,46 +124,80 @@ const saveBtn = document.getElementById("saveBtn");
 
 let editId = null;
 
-// ----- Load Content -----
-onSnapshot(collection(db, "classContent"), (snapshot) => {
-    contentList.innerHTML = "";
-    snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data.classCode !== classCode) return; // Only this class
-        const id = docSnap.id;
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-            <h3>${data.title}</h3>
-            <p>${data.description}</p>
-            ${data.type === "assignment" && data.dueDate ? `<small>Due: ${data.dueDate}</small>` : ""}
-            <div class="actions">
-                <button class="edit-btn">Edit</button>
-                <button class="delete-btn">Delete</button>
-            </div>
-        `;
-        const editBtn = div.querySelector(".edit-btn");
-        const deleteBtn = div.querySelector(".delete-btn");
+// ----- Authentication & Load Class -----
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "index.html"; // Not logged in
+        return;
+    }
 
-        editBtn.addEventListener("click", () => {
-            titleInput.value = data.title;
-            descriptionInput.value = data.description;
-            dueDateInput.value = data.dueDate || "";
-            contentTypeSelect.value = data.type;
-            editId = id;
-        });
-
-        deleteBtn.addEventListener("click", async () => {
-            if (confirm("Delete this item?")) {
-                await deleteDoc(doc(db, "classContent", id));
-            }
-        });
-
-        contentList.appendChild(div);
-    });
+    await loadClassName();
+    loadClassContent();
 });
 
-// ----- Save / Edit Content -----
+// ----- Load class name -----
+async function loadClassName() {
+    classHeader.textContent = "Loading...";
+    try {
+        const classSnap = await getDoc(doc(db, "classes", classCode));
+        if (classSnap.exists()) {
+            const classData = classSnap.data();
+            const className = classData.name || "Unnamed Class";
+            classHeader.textContent = className;
+            document.title = className;
+        } else {
+            classHeader.textContent = "Class Not Found";
+            document.title = "Class Not Found";
+        }
+    } catch (err) {
+        console.error("Error loading class:", err);
+        classHeader.textContent = "Error Loading Class";
+        document.title = "Error";
+    }
+}
+
+// ----- Load class content -----
+function loadClassContent() {
+    onSnapshot(collection(db, "classContent"), (snapshot) => {
+        contentList.innerHTML = "";
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.classCode !== classCode) return;
+            const id = docSnap.id;
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `
+                <h3>${data.title}</h3>
+                <p>${data.description}</p>
+                ${data.type === "assignment" && data.dueDate ? `<small>Due: ${data.dueDate}</small>` : ""}
+                <div class="actions">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                </div>
+            `;
+            const editBtn = div.querySelector(".edit-btn");
+            const deleteBtn = div.querySelector(".delete-btn");
+
+            editBtn.addEventListener("click", () => {
+                titleInput.value = data.title;
+                descriptionInput.value = data.description;
+                dueDateInput.value = data.dueDate || "";
+                contentTypeSelect.value = data.type;
+                editId = id;
+            });
+
+            deleteBtn.addEventListener("click", async () => {
+                if (confirm("Delete this item?")) {
+                    await deleteDoc(doc(db, "classContent", id));
+                }
+            });
+
+            contentList.appendChild(div);
+        });
+    });
+}
+
+// ----- Save / Edit content -----
 saveBtn.addEventListener("click", async () => {
     const type = contentTypeSelect.value;
     const title = titleInput.value.trim();
@@ -192,26 +206,28 @@ saveBtn.addEventListener("click", async () => {
 
     if (!title || !description) return alert("Please fill title and description.");
 
-    if (editId) {
-        // Update existing
-        await updateDoc(doc(db, "classContent", editId), { title, description, dueDate, type });
-        editId = null;
-    } else {
-        // Add new
-        await addDoc(contentRef, {
-            classCode,
-            type,
-            title,
-            description,
-            dueDate,
-            timestamp: Date.now()
-        });
+    try {
+        if (editId) {
+            await updateDoc(doc(db, "classContent", editId), { title, description, dueDate, type });
+            editId = null;
+        } else {
+            await addDoc(contentRef, {
+                classCode,
+                type,
+                title,
+                description,
+                dueDate,
+                timestamp: Date.now()
+            });
+        }
+        titleInput.value = "";
+        descriptionInput.value = "";
+        dueDateInput.value = "";
+        contentTypeSelect.value = "assignment";
+    } catch (err) {
+        console.error("Error saving content:", err);
+        alert("Failed to save. Check console for details.");
     }
-
-    titleInput.value = "";
-    descriptionInput.value = "";
-    dueDateInput.value = "";
-    contentTypeSelect.value = "assignment";
 });
 </script>
 
