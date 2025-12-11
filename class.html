@@ -1,234 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="classTitle">Class Name</title>
+<script type="module">
+    // ------------------ FIREBASE INIT ------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+        getFirestore, collection, addDoc,
+        onSnapshot, doc, updateDoc, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f4f5f7;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .form-box {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 700px;
-            margin: 0 auto 20px auto;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-        input, textarea, button, select {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .content-box {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-        .item {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 10px;
-        }
-        .item h3 {
-            margin: 0;
-        }
-        .item small {
-            color: #666;
-        }
-        .actions {
-            margin-top: 10px;
-        }
-        .actions button {
-            width: auto;
-            padding: 5px 10px;
-            margin-right: 5px;
-            border-radius: 4px;
-        }
-        .edit-btn {
-            background-color: #ffc107;
-        }
-        .delete-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-    </style>
-</head>
-<body>
+    // ---- YOUR FIREBASE CONFIG ----
+    const firebaseConfig = {
+        apiKey: "YOUR_KEY",
+        authDomain: "YOUR_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_BUCKET",
+        messagingSenderId: "YOUR_ID",
+        appId: "YOUR_APP_ID"
+    };
 
-    <h1 id="classHeader">Class Name</h1>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    <!-- Class Name Input -->
-    <div class="form-box">
-        <h2>Set Class Name</h2>
-        <input type="text" id="classNameInput" placeholder="Enter class name">
-        <button onclick="setClassName()">Set Class Name</button>
-    </div>
+    const contentRef = collection(db, "classContent");
 
-    <!-- Create Content -->
-    <div class="form-box">
-        <h2>Create Assignment or Post</h2>
+    // ------------------ SAVE CONTENT ------------------
+    window.saveContent = async function () {
+        const type = document.getElementById("contentType").value;
+        const title = document.getElementById("title").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const dueDateInput = document.getElementById("dueDate").value;
 
-        <select id="contentType">
-            <option value="assignment">Assignment</option>
-            <option value="post">Post</option>
-        </select>
-
-        <input type="text" id="title" placeholder="Title" required>
-        <textarea id="description" placeholder="Description" required></textarea>
-        <input type="date" id="dueDate">
-
-        <button onclick="saveContent()">Upload</button>
-    </div>
-
-    <!-- Class Content Box -->
-    <div class="content-box">
-        <h2>Class Content</h2>
-        <div id="contentList"></div>
-    </div>
-
-    <!-- Firebase -->
-    <script type="module">
-        // ------------------ FIREBASE INIT ------------------
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import {
-            getFirestore, collection, addDoc,
-            onSnapshot, doc, updateDoc, deleteDoc
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-        // ---- PASTE YOUR FIREBASE CONFIG BELOW ----
-        const firebaseConfig = {
-  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-  projectId: "simpleloginapp-a7b53",
-  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-  messagingSenderId: "410260892945",
-  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-};
-
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        const contentRef = collection(db, "classContent");
-
-        // ------------------ CLASS NAME ------------------
-        function setClassName() {
-            const name = document.getElementById("classNameInput").value;
-            if (name.trim() === "") return;
-            document.title = name;
-            document.getElementById("classHeader").textContent = name;
+        if (title === "" || description === "") {
+            alert("Please fill in the title and description.");
+            return;
         }
 
-        window.setClassName = setClassName;
+        const dueDate = type === "assignment" ? dueDateInput : "";
 
-        // ------------------ SAVE CONTENT ------------------
-        async function saveContent() {
-            const type = document.getElementById("contentType").value;
-            const title = document.getElementById("title").value;
-            const desc = document.getElementById("description").value;
-            const due = document.getElementById("dueDate").value;
-
-            if (!title || !desc) {
-                alert("Please fill in title and description.");
-                return;
-            }
-
+        try {
             await addDoc(contentRef, {
                 type,
                 title,
-                description: desc,
-                dueDate: type === "assignment" ? due : "",
+                description,
+                dueDate,
                 timestamp: Date.now()
             });
 
+            // CLEAR FIELDS
             document.getElementById("title").value = "";
             document.getElementById("description").value = "";
             document.getElementById("dueDate").value = "";
+
+        } catch (err) {
+            console.error("ERROR SAVING:", err);
         }
+    };
 
-        window.saveContent = saveContent;
+    // ------------------ DISPLAY CONTENT ------------------
+    onSnapshot(contentRef, (snapshot) => {
+        const list = document.getElementById("contentList");
+        list.innerHTML = "";
 
-        // ------------------ RENDER CONTENT ------------------
-        onSnapshot(contentRef, (snapshot) => {
-            const list = document.getElementById("contentList");
-            list.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+            const item = docSnap.data();
+            const id = docSnap.id;
 
-            snapshot.forEach((docSnap) => {
-                const item = docSnap.data();
-                const id = docSnap.id;
+            const div = document.createElement("div");
+            div.className = "item";
 
-                const div = document.createElement("div");
-                div.className = "item";
+            div.innerHTML = `
+                <h3>${item.title}</h3>
+                <p>${item.description}</p>
+                ${item.type === "assignment" && item.dueDate ? `<small>Due: ${item.dueDate}</small>` : ""}
+                <div class="actions">
+                    <button class="edit-btn" onclick="editItem('${id}')">Edit</button>
+                    <button class="delete-btn" onclick="deleteItem('${id}')">Delete</button>
+                </div>
+            `;
 
-                div.innerHTML = `
-                    <h3>${item.title}</h3>
-                    <p>${item.description}</p>
-                    ${item.type === "assignment" ? `<small>Due: ${item.dueDate}</small>` : ""}
-                    <div class="actions">
-                        <button class="edit-btn" onclick="editItem('${id}', '${item.title}', '${item.description}', '${item.dueDate}', '${item.type}')">Edit</button>
-                        <button class="delete-btn" onclick="deleteItem('${id}')">Delete</button>
-                    </div>
-                `;
-
-                list.appendChild(div);
-            });
+            list.appendChild(div);
         });
+    });
 
-        // ------------------ EDIT ITEM ------------------
-        window.editItem = async function(id, title, desc, due, type) {
-            document.getElementById("contentType").value = type;
-            document.getElementById("title").value = title;
-            document.getElementById("description").value = desc;
-            document.getElementById("dueDate").value = due;
+    // ------------------ EDIT CONTENT ------------------
+    window.editItem = function (id) {
+        const docRef = doc(db, "classContent", id);
 
-            // Override Save button behavior
-            window.saveContent = async function() {
-                const newTitle = document.getElementById("title").value;
-                const newDesc = document.getElementById("description").value;
-                const newDue = document.getElementById("dueDate").value;
-                const newType = document.getElementById("contentType").value;
+        // Load data to form
+        const itemBox = document.querySelector(`button[onclick="editItem('${id}')"]`).parentElement.parentElement;
 
-                await updateDoc(doc(db, "classContent", id), {
-                    title: newTitle,
-                    description: newDesc,
-                    dueDate: newType === "assignment" ? newDue : "",
-                    type: newType
-                });
+        const title = itemBox.querySelector("h3").innerText;
+        const description = itemBox.querySelector("p").innerText;
+        const dueText = itemBox.querySelector("small")?.innerText || "";
+        const dueDate = dueText.replace("Due: ", "");
 
-                location.reload();
-            };
+        document.getElementById("title").value = title;
+        document.getElementById("description").value = description;
+        document.getElementById("dueDate").value = dueDate;
+
+        // Override save button for editing
+        window.saveContent = async function () {
+            const newTitle = document.getElementById("title").value.trim();
+            const newDesc = document.getElementById("description").value.trim();
+            const newDue = document.getElementById("dueDate").value;
+
+            await updateDoc(docRef, {
+                title: newTitle,
+                description: newDesc,
+                dueDate: newDue
+            });
+
+            // Restore normal behavior
+            location.reload();
         };
+    };
 
-        // ------------------ DELETE ITEM ------------------
-        window.deleteItem = async function(id) {
-            if (confirm("Delete this item?")) {
-                await deleteDoc(doc(db, "classContent", id));
-            }
-        };
-    </script>
-</body>
-</html>
+    // ------------------ DELETE CONTENT ------------------
+    window.deleteItem = async function (id) {
+        if (confirm("Delete this item?")) {
+            await deleteDoc(doc(db, "classContent", id));
+        }
+    };
+
+    // ------------------ SET CLASS NAME ------------------
+    window.setClassName = function () {
+        const name = document.getElementById("classNameInput").value.trim();
+        if (name === "") return;
+        document.title = name;
+        document.getElementById("classHeader").textContent = name;
+    };
+</script>
