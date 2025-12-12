@@ -35,11 +35,8 @@
   <div id="assignmentsContainer"></div>
 
   <script type="module">
-    // -------------------------------
-    // FIREBASE CONFIG
-    // -------------------------------
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
@@ -58,11 +55,10 @@
     // -------------------------------
     const urlParams = new URLSearchParams(window.location.search);
     const classCode = urlParams.get("code");
-
     console.log("Class code from URL:", classCode);
 
     // -------------------------------
-    // LOAD CLASS NAME FROM SUBCOLLECTION
+    // LOAD CLASS NAME FROM FIRESTORE
     // -------------------------------
     async function loadClassName() {
       if (!classCode) {
@@ -72,19 +68,16 @@
       }
 
       try {
-        const subcolRef = collection(db, "classes", classCode); // points to subcollection named after the code
-        const snapshot = await getDocs(subcolRef);
+        const classRef = doc(db, "classes", classCode);
+        const classSnap = await getDoc(classRef);
 
-        if (!snapshot.empty) {
-          // Take the first document in the subcollection
-          const firstDoc = snapshot.docs[0].data();
-          const className = firstDoc.name || "Class " + classCode;
-          console.log("Loaded class name from subcollection:", className);
-
+        if (classSnap.exists()) {
+          const className = classSnap.data().name;
+          console.log("Loaded class name:", className);
           document.title = className;
           document.getElementById("classHeader").innerText = className;
         } else {
-          console.warn("Subcollection is empty for code:", classCode);
+          console.warn("Class document does NOT exist for code:", classCode);
           document.getElementById("classHeader").innerText = "Class Not Found";
           document.title = "Class Not Found";
         }
@@ -98,7 +91,7 @@
     loadClassName();
 
     // -------------------------------
-    // ASSIGNMENT LOGIC (unchanged)
+    // ASSIGNMENT LOGIC
     // -------------------------------
     const form = document.getElementById('assignmentForm');
     const assignmentsContainer = document.getElementById('assignmentsContainer');
@@ -166,7 +159,6 @@
 
     form.addEventListener('submit', addAssignment);
     renderAssignments();
-
   </script>
 </body>
 </html>
