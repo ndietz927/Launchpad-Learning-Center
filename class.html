@@ -73,7 +73,48 @@
 </head>
 <body>
 
-<h1 id="classHeader">Class Content</h1>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+// --- YOUR FIREBASE CONFIG (same as teacher.html) ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+  projectId: "simpleloginapp-a7b53",
+  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+  messagingSenderId: "410260892945",
+  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- GET CLASS CODE FROM URL ---
+const urlParams = new URLSearchParams(window.location.search);
+const classCode = urlParams.get("code");
+
+// --- LOAD CLASS NAME FROM FIRESTORE ---
+async function loadClassName() {
+    if (!classCode) return;
+
+    const classRef = doc(db, "classes", classCode);
+    const classSnap = await getDoc(classRef);
+
+    if (classSnap.exists()) {
+        const className = classSnap.data().name;
+
+        // Set HTML title
+        document.title = className;
+
+        // Set page header
+        document.getElementById("classHeader").innerText = className;
+    } else {
+        document.getElementById("classHeader").innerText = "Class Not Found";
+        document.title = "Class Not Found";
+    }
+}
+
+loadClassName();
 
 <form id="assignmentForm">
     <input type="hidden" id="editIndex">
