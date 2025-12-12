@@ -39,7 +39,7 @@
     // FIREBASE CONFIG
     // -------------------------------
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
@@ -58,40 +58,38 @@
     // -------------------------------
     const urlParams = new URLSearchParams(window.location.search);
     const classCode = urlParams.get("code");
-    console.log("class.html loaded. Code from URL:", classCode);
+
+    console.log("Class code from URL:", classCode);
 
     // -------------------------------
-    // LOAD CLASS NAME FROM FIRESTORE
+    // LOAD CLASS NAME FROM SUBCOLLECTION
     // -------------------------------
     async function loadClassName() {
       if (!classCode) {
-        console.warn("No code parameter found in URL.");
         document.getElementById("classHeader").innerText = "Class Not Found";
         document.title = "Class Not Found";
         return;
       }
 
-      const classRef = doc(db, "classes", classCode);
       try {
-        const snap = await getDoc(classRef);
+        const subcolRef = collection(db, "classes", classCode); // points to subcollection named after the code
+        const snapshot = await getDocs(subcolRef);
 
-        if (snap.exists()) {
-          const classData = snap.data();
-          const className = classData.name || ("Class " + classCode);
-          console.log("Loaded class document:", classData);
+        if (!snapshot.empty) {
+          // Take the first document in the subcollection
+          const firstDoc = snapshot.docs[0].data();
+          const className = firstDoc.name || "Class " + classCode;
+          console.log("Loaded class name from subcollection:", className);
 
-          // Set tab title
           document.title = className;
-
-          // Update <h1>
           document.getElementById("classHeader").innerText = className;
         } else {
-          console.warn("Class not found in Firestore for code:", classCode);
+          console.warn("Subcollection is empty for code:", classCode);
           document.getElementById("classHeader").innerText = "Class Not Found";
           document.title = "Class Not Found";
         }
       } catch (err) {
-        console.error("Error loading class:", err);
+        console.error("Error loading class from Firestore:", err);
         document.getElementById("classHeader").innerText = "Error Loading Class";
         document.title = "Error Loading Class";
       }
@@ -100,7 +98,7 @@
     loadClassName();
 
     // -------------------------------
-    // ASSIGNMENT LOGIC
+    // ASSIGNMENT LOGIC (unchanged)
     // -------------------------------
     const form = document.getElementById('assignmentForm');
     const assignmentsContainer = document.getElementById('assignmentsContainer');
