@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Teacher Dashboard</title>
+  <title>Loading...</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Inter Font -->
@@ -15,10 +15,10 @@
       background-color: #0d0d0d;
       color: #fff;
       min-height: 100vh;
+      padding: 40px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 40px;
     }
 
     .container {
@@ -28,15 +28,10 @@
 
     h1 {
       font-size: 2.2rem;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
       background: linear-gradient(135deg, #ff512f, #dd2476);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-
-    .subtitle {
-      color: #aaa;
-      margin-bottom: 30px;
     }
 
     .card {
@@ -53,7 +48,7 @@
       color: #ffb199;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       background-color: #2b2b2b;
       color: #fff;
@@ -62,13 +57,15 @@
       padding: 12px;
       font-size: 1rem;
       margin-bottom: 15px;
+      font-family: inherit;
     }
 
-    input::placeholder {
+    input::placeholder,
+    textarea::placeholder {
       color: #aaa;
     }
 
-    .btn-primary {
+    button {
       background: linear-gradient(135deg, #ff512f, #dd2476);
       border: none;
       border-radius: 12px;
@@ -79,145 +76,143 @@
       color: #fff;
     }
 
-    .btn-primary:hover {
+    button:hover {
       background: linear-gradient(135deg, #dd2476, #ff512f);
     }
 
-    .class-item {
+    .content-item {
       background-color: #2b2b2b;
       border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
       border-left: 4px solid #ff8a65;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      position: relative;
     }
 
-    .class-item strong {
+    .content-item h3 {
+      margin: 0 0 6px;
       color: #ffb199;
-      font-size: 1.05rem;
     }
 
-    .class-actions button {
-      margin-left: 10px;
+    .content-item small {
+      color: #aaa;
     }
 
-    .btn-outline {
-      border: 1px solid #ff8a65;
+    .actions {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+    }
+
+    .actions button {
+      background: none;
+      border: none;
       color: #ff8a65;
-      background: transparent;
-      border-radius: 10px;
-      padding: 8px 12px;
+      font-weight: 600;
+      margin-left: 10px;
       cursor: pointer;
     }
 
-    .btn-outline:hover {
-      background: #ff8a65;
-      color: #000;
+    .actions button:hover {
+      color: #fff;
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>Teacher Dashboard</h1>
-    <p class="subtitle">Create and manage your classes</p>
+    <h1 id="classTitle">Loading...</h1>
 
-    <!-- Create Class -->
+    <!-- Add Assignment -->
     <div class="card">
-      <h2>Create a Class</h2>
-      <input id="className" type="text" placeholder="Class name (e.g. Intro to Firebase)" />
-      <button id="createClassBtn" class="btn-primary">Create Class</button>
+      <h2>Add Assignment</h2>
+      <form id="assignmentForm">
+        <input type="hidden" id="editIndex">
+        <input id="title" placeholder="Assignment title" required />
+        <textarea id="description" placeholder="Description" required></textarea>
+        <input id="dueDate" type="date" required />
+        <button type="submit">Save Assignment</button>
+      </form>
     </div>
 
-    <!-- Class List -->
+    <!-- Class Content -->
     <div class="card">
-      <h2>Your Classes</h2>
-      <div id="classList"></div>
+      <h2>Class Content</h2>
+      <div id="assignmentsContainer"></div>
     </div>
   </div>
 
-  <!-- Firebase Logic -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      getDocs,
-      query,
-      where,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <script>
+    // Get class code from URL
+    const params = new URLSearchParams(window.location.search);
+    const classCode = params.get("code");
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-      authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-      projectId: "simpleloginapp-a7b53",
-      storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-      messagingSenderId: "410260892945",
-      appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-    };
+    // Load class name
+    const className = localStorage.getItem(`className_${classCode}`);
+    if (className) {
+      document.title = className;
+      document.getElementById("classTitle").textContent = className;
+    }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const form = document.getElementById("assignmentForm");
+    const container = document.getElementById("assignmentsContainer");
 
-    const classList = document.getElementById("classList");
-    const createBtn = document.getElementById("createClassBtn");
-    const classNameInput = document.getElementById("className");
+    let assignments = JSON.parse(localStorage.getItem(`assignments_${classCode}`)) || [];
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      loadClasses(user.uid);
-    });
-
-    createBtn.addEventListener("click", async () => {
-      const name = classNameInput.value.trim();
-      if (!name) return alert("Enter a class name");
-
-      const classCode = Math.floor(10000000 + Math.random() * 90000000).toString();
-
-      await setDoc(doc(db, "classes", classCode), {
-        name,
-        teacherUid: auth.currentUser.uid,
-        teacherEmail: auth.currentUser.email,
-        createdAt: serverTimestamp()
-      });
-
-      classNameInput.value = "";
-      loadClasses(auth.currentUser.uid);
-    });
-
-    async function loadClasses(uid) {
-      classList.innerHTML = "";
-
-      const q = query(collection(db, "classes"), where("teacherUid", "==", uid));
-      const snapshot = await getDocs(q);
-
-      snapshot.forEach(docSnap => {
-        const cls = docSnap.data();
-
+    function renderAssignments() {
+      container.innerHTML = "";
+      assignments.forEach((a, i) => {
         const div = document.createElement("div");
-        div.className = "class-item";
+        div.className = "content-item";
         div.innerHTML = `
-          <strong>${cls.name}</strong>
-          <div class="class-actions">
-            <button class="btn-outline" onclick="location.href='class.html?code=${docSnap.id}'">
-              View Class
-            </button>
+          <h3>${a.title}</h3>
+          <p>${a.description}</p>
+          <small>Due: ${a.dueDate}</small>
+          <div class="actions">
+            <button onclick="edit(${i})">Edit</button>
+            <button onclick="remove(${i})">Delete</button>
           </div>
         `;
-        classList.appendChild(div);
+        container.appendChild(div);
       });
     }
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+
+      const title = titleInput.value;
+      const description = descriptionInput.value;
+      const dueDate = dueDateInput.value;
+      const editIndex = editIndexInput.value;
+
+      if (editIndex === "") {
+        assignments.push({ title, description, dueDate });
+      } else {
+        assignments[editIndex] = { title, description, dueDate };
+      }
+
+      localStorage.setItem(`assignments_${classCode}`, JSON.stringify(assignments));
+      form.reset();
+      editIndexInput.value = "";
+      renderAssignments();
+    });
+
+    function edit(i) {
+      const a = assignments[i];
+      titleInput.value = a.title;
+      descriptionInput.value = a.description;
+      dueDateInput.value = a.dueDate;
+      editIndexInput.value = i;
+    }
+
+    function remove(i) {
+      if (!confirm("Delete this item?")) return;
+      assignments.splice(i, 1);
+      localStorage.setItem(`assignments_${classCode}`, JSON.stringify(assignments));
+      renderAssignments();
+    }
+
+    renderAssignments();
   </script>
 </body>
 </html>
