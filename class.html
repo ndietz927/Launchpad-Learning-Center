@@ -1,218 +1,131 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Loading...</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    margin: 20px;
+    background-color: #0d0d0d;
+    color: #ffffff;
+}
 
-  <!-- Inter Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+h1 {
+    text-align: center;
+    color: #ff8a65;
+    text-shadow: 0 0 15px rgba(255, 138, 101, 0.4);
+}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: #0d0d0d;
-      color: #fff;
-      min-height: 100vh;
-      padding: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
+h2 {
+    color: #ffb199;
+}
 
-    .container {
-      width: 100%;
-      max-width: 900px;
-    }
+.form-box, .content-box {
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 900px;
+    margin: 25px auto;
+    box-shadow: 0 0 25px rgba(221, 36, 118, 0.25);
+}
 
-    h1 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #ff512f, #dd2476);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: #2b2b2b;
+    color: #ffffff;
+}
 
-    .card {
-      background: #1c1c1c;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 0 25px rgba(221, 36, 118, 0.25);
-      margin-bottom: 30px;
-    }
+input::placeholder,
+textarea::placeholder {
+    color: #aaa;
+}
 
-    .card h2 {
-      margin-top: 0;
-      margin-bottom: 15px;
-      color: #ffb199;
-    }
+select {
+    cursor: pointer;
+}
 
-    input, textarea {
-      width: 100%;
-      background-color: #2b2b2b;
-      color: #fff;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 1rem;
-      margin-bottom: 15px;
-      font-family: inherit;
-    }
+button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    color: white;
+}
 
-    input::placeholder,
-    textarea::placeholder {
-      color: #aaa;
-    }
+button:hover {
+    background: linear-gradient(135deg, #dd2476, #ff512f);
+}
 
-    button {
-      background: linear-gradient(135deg, #ff512f, #dd2476);
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-    }
+.item {
+    padding: 18px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+    position: relative;
+    background: #2b2b2b;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
 
-    button:hover {
-      background: linear-gradient(135deg, #dd2476, #ff512f);
-    }
+.assignment {
+    border-left: 6px solid #ff8a65;
+}
 
-    .content-item {
-      background-color: #2b2b2b;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 15px;
-      border-left: 4px solid #ff8a65;
-      position: relative;
-    }
+.assignment.upcoming {
+    background: linear-gradient(135deg, #2b2b2b, #33211d);
+}
 
-    .content-item h3 {
-      margin: 0 0 6px;
-      color: #ffb199;
-    }
+.assignment.overdue {
+    background: linear-gradient(135deg, #2b2b2b, #3a1b1b);
+    border-left-color: #dc3545;
+}
 
-    .content-item small {
-      color: #aaa;
-    }
+.post {
+    border-left: 6px solid #6c757d;
+}
 
-    .actions {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-    }
+.item h3 {
+    margin: 0;
+    color: #ffb199;
+}
 
-    .actions button {
-      background: none;
-      border: none;
-      color: #ff8a65;
-      font-weight: 600;
-      margin-left: 10px;
-      cursor: pointer;
-    }
+.item p {
+    margin: 8px 0;
+}
 
-    .actions button:hover {
-      color: #fff;
-    }
-  </style>
-</head>
+.item small {
+    color: #bbb;
+}
 
-<body>
-  <div class="container">
-    <h1 id="classTitle">Loading...</h1>
+.actions {
+    margin-top: 12px;
+}
 
-    <!-- Add Assignment -->
-    <div class="card">
-      <h2>Add Assignment</h2>
-      <form id="assignmentForm">
-        <input type="hidden" id="editIndex">
-        <input id="title" placeholder="Assignment title" required />
-        <textarea id="description" placeholder="Description" required></textarea>
-        <input id="dueDate" type="date" required />
-        <button type="submit">Save Assignment</button>
-      </form>
-    </div>
+.actions button {
+    width: auto;
+    padding: 6px 14px;
+    margin-right: 6px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
 
-    <!-- Class Content -->
-    <div class="card">
-      <h2>Class Content</h2>
-      <div id="assignmentsContainer"></div>
-    </div>
-  </div>
+.edit-btn {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #000;
+}
 
-  <script>
-    // Get class code from URL
-    const params = new URLSearchParams(window.location.search);
-    const classCode = params.get("code");
+.edit-btn:hover {
+    opacity: 0.9;
+}
 
-    // Load class name
-    const className = localStorage.getItem(`className_${classCode}`);
-    if (className) {
-      document.title = className;
-      document.getElementById("classTitle").textContent = className;
-    }
+.delete-btn {
+    background: linear-gradient(135deg, #c62828, #b71c1c);
+    color: white;
+}
 
-    const form = document.getElementById("assignmentForm");
-    const container = document.getElementById("assignmentsContainer");
-
-    let assignments = JSON.parse(localStorage.getItem(`assignments_${classCode}`)) || [];
-
-    function renderAssignments() {
-      container.innerHTML = "";
-      assignments.forEach((a, i) => {
-        const div = document.createElement("div");
-        div.className = "content-item";
-        div.innerHTML = `
-          <h3>${a.title}</h3>
-          <p>${a.description}</p>
-          <small>Due: ${a.dueDate}</small>
-          <div class="actions">
-            <button onclick="edit(${i})">Edit</button>
-            <button onclick="remove(${i})">Delete</button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-
-      const title = titleInput.value;
-      const description = descriptionInput.value;
-      const dueDate = dueDateInput.value;
-      const editIndex = editIndexInput.value;
-
-      if (editIndex === "") {
-        assignments.push({ title, description, dueDate });
-      } else {
-        assignments[editIndex] = { title, description, dueDate };
-      }
-
-      localStorage.setItem(`assignments_${classCode}`, JSON.stringify(assignments));
-      form.reset();
-      editIndexInput.value = "";
-      renderAssignments();
-    });
-
-    function edit(i) {
-      const a = assignments[i];
-      titleInput.value = a.title;
-      descriptionInput.value = a.description;
-      dueDateInput.value = a.dueDate;
-      editIndexInput.value = i;
-    }
-
-    function remove(i) {
-      if (!confirm("Delete this item?")) return;
-      assignments.splice(i, 1);
-      localStorage.setItem(`assignments_${classCode}`, JSON.stringify(assignments));
-      renderAssignments();
-    }
-
-    renderAssignments();
-  </script>
-</body>
-</html>
+.delete-btn:hover {
+    opacity: 0.9;
+}
+</style>
