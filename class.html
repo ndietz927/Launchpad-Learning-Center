@@ -6,59 +6,75 @@
 <title>Loading...</title>
 
 <style>
+/* ===== Body ===== */
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #0d0d0d;
+    margin: 0;
+    padding: 20px;
+    background-color: #0d0d0d; /* dark background */
+    color: #fff;
 }
 
-h1 {
+/* ===== Headings ===== */
+h1, h2 {
     text-align: center;
     color: #ff8a65; /* warm orange for headers */
 }
 
+/* ===== Form & Content Boxes ===== */
 .form-box, .content-box {
-    background: #1c1c1c;
-    padding: 15px;
-    border-radius: 10px;
+    background: #1c1c1c; /* dark card background */
+    padding: 20px;
+    border-radius: 14px;
     max-width: 800px;
     margin: 20px auto;
-    box-shadow: 0 0 25px rgba(255, 94, 77, 0.3);
+    box-shadow: 0 0 25px rgba(255, 94, 77, 0.3); /* orange glow */
 }
 
+/* ===== Inputs, Textareas, Selects, Buttons ===== */
 input, textarea, select, button {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin-top: 10px;
-    border-radius: 5px;
-    border: 1px solid #444;
+    border-radius: 8px;
+    border: 1px solid #444; /* darker border for dark theme */
     background-color: #2c2c2c;
     color: #fff;
 }
 
-button {
-    background-color: linear-gradient(135deg, #ff512f, #dd2476);
-    color: white;
-    border: none;
-    cursor: pointer;
+input::placeholder, textarea::placeholder {
+    color: #aaa;
 }
-button:hover { linear-gradient(135deg, #dd2476, #ff512f); }
 
+/* ===== Buttons ===== */
+button {
+    background: linear-gradient(135deg, #ff512f, #dd2476); /* gradient orange/pink */
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #dd2476, #ff512f); /* reversed gradient on hover */
+}
+
+/* ===== Item List ===== */
 .item {
     padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
     position: relative;
     background: #2c2c2c;
     color: #fff;
 }
 
 .assignment {
-    border-left: 6px solid #ff512f;
+    border-left: 6px solid #ff512f; /* accent color */
 }
 
 .assignment.upcoming {
-    background: #3a3a3a;
+    background: #3a3a3a; /* slightly lighter dark gray */
 }
 
 .assignment.overdue {
@@ -72,12 +88,14 @@ button:hover { linear-gradient(135deg, #dd2476, #ff512f); }
 
 .item h3 {
     margin: 0;
+    color: #ff8a65; /* orange headers for items */
 }
 
 .item small {
-    color: #555;
+    color: #ccc; /* lighter gray for details */
 }
 
+/* ===== Action Buttons ===== */
 .actions {
     margin-top: 10px;
 }
@@ -86,17 +104,35 @@ button:hover { linear-gradient(135deg, #dd2476, #ff512f); }
     width: auto;
     padding: 5px 10px;
     margin-right: 5px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .edit-btn {
-    background-color: #ffc107;
+    background-color: #ffc107; /* yellow */
     color: #000;
 }
 
 .delete-btn {
-    background-color: #dc3545;
+    background-color: #dc3545; /* red */
     color: white;
+}
+
+/* ===== Inputs focus effect ===== */
+input:focus, textarea:focus, select:focus {
+    border-color: #ff512f;
+    outline: none;
+}
+
+/* ===== Scrollbar (optional dark theme) ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1c1c1c;
+}
+::-webkit-scrollbar-thumb {
+    background: #ff512f;
+    border-radius: 4px;
 }
 </style>
 </head>
