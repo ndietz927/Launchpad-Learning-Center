@@ -1,164 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Class Content</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f2f5; }
-    h1 { text-align: center; }
-    form { background: white; padding: 15px; border-radius: 10px; max-width: 600px; margin: 0 auto 20px auto; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
-    input, textarea, button { width: 100%; padding: 8px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { background-color: #007bff; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    .assignment { background: white; padding: 15px; border-radius: 10px; max-width: 600px; margin: 10px auto; box-shadow: 0px 0px 5px rgba(0,0,0,0.1); position: relative; }
-    .assignment h3 { margin: 0; }
-    .assignment p { margin: 5px 0; }
-    .assignment small { color: #666; }
-    .actions { position: absolute; top: 10px; right: 10px; }
-    .actions button { background-color: #dc3545; margin-left: 5px; }
-    .actions button.edit { background-color: #ffc107; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Loading...</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f0f2f5;
+}
+
+h1 {
+    text-align: center;
+}
+
+.form-box, .content-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+input, textarea, select, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover { background-color: #0056b3; }
+
+.item {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    position: relative;
+    background: #fafafa;
+}
+
+.assignment {
+    border-left: 6px solid #007bff;
+}
+
+.assignment.upcoming {
+    background: #e8f1ff;
+}
+
+.assignment.overdue {
+    background: #ffecec;
+    border-left-color: #dc3545;
+}
+
+.post {
+    border-left: 6px solid #6c757d;
+}
+
+.item h3 {
+    margin: 0;
+}
+
+.item small {
+    color: #555;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+.actions button {
+    width: auto;
+    padding: 5px 10px;
+    margin-right: 5px;
+    border-radius: 4px;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+</style>
 </head>
+
 <body>
 
-  <h1 id="classHeader">Loading Class...</h1>
+<h1 id="classHeader">Loading...</h1>
 
-  <form id="assignmentForm">
-    <input type="hidden" id="editIndex">
-    <input type="text" id="title" placeholder="Assignment Title" required>
-    <textarea id="description" placeholder="Assignment Description" required></textarea>
-    <input type="date" id="dueDate" required>
-    <button type="submit">Add Assignment</button>
-  </form>
+<div class="form-box">
+    <h2>Create Assignment / Post</h2>
 
-  <div id="assignmentsContainer"></div>
+    <select id="contentType">
+        <option value="assignment">Assignment</option>
+        <option value="post">Post</option>
+    </select>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    <input type="text" id="title" placeholder="Title" />
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="date" id="dueDate" />
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-      authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-      projectId: "simpleloginapp-a7b53",
-      storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-      messagingSenderId: "410260892945",
-      appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+    <button id="saveBtn">Upload</button>
+</div>
+
+<div class="content-box">
+    <h2>Class Content</h2>
+    <div id="contentList"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+    getFirestore, collection, doc, addDoc, onSnapshot,
+    updateDoc, deleteDoc, getDoc
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+/* 🔥 Firebase Config (same as teacher.html) */
+const firebaseConfig = {
+    apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+    authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+    projectId: "simpleloginapp-a7b53",
+    storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+    messagingSenderId: "410260892945",
+    appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ----- URL class code ----- */
+const classCode = new URLSearchParams(window.location.search).get("code");
+
+/* ----- Elements ----- */
+const classHeader = document.getElementById("classHeader");
+const contentList = document.getElementById("contentList");
+const saveBtn = document.getElementById("saveBtn");
+
+const titleInput = document.getElementById("title");
+const descriptionInput = document.getElementById("description");
+const dueDateInput = document.getElementById("dueDate");
+const typeSelect = document.getElementById("contentType");
+
+let editId = null;
+
+/* ----- Auth gate (NO redirect bug) ----- */
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
+    await loadClassName();
+    loadContent();
+});
+
+/* ----- Load class name ----- */
+async function loadClassName() {
+    const snap = await getDoc(doc(db, "classes", classCode));
+    if (!snap.exists()) {
+        classHeader.textContent = "Class Not Found";
+        return;
+    }
+    const name = snap.data().name;
+    classHeader.textContent = name;
+    document.title = name;
+}
+
+/* ----- Load & sort content ----- */
+function loadContent() {
+    onSnapshot(collection(db, "classContent"), (snapshot) => {
+        let items = [];
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.classCode === classCode) {
+                items.push({ id: docSnap.id, ...data });
+            }
+        });
+
+        // Sort: assignments by due date first
+        items.sort((a, b) => {
+            if (a.type === "assignment" && b.type === "assignment") {
+                return new Date(a.dueDate || 0) - new Date(b.dueDate || 0);
+            }
+            if (a.type === "assignment") return -1;
+            if (b.type === "assignment") return 1;
+            return 0;
+        });
+
+        renderItems(items);
+    });
+}
+
+/* ----- Render ----- */
+function renderItems(items) {
+    contentList.innerHTML = "";
+    const today = new Date().toISOString().split("T")[0];
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+
+        let classes = "item " + item.type;
+        if (item.type === "assignment") {
+            if (item.dueDate < today) classes += " overdue";
+            else classes += " upcoming";
+        }
+
+        div.className = classes;
+        div.innerHTML = `
+            <h3>${item.title}</h3>
+            <p>${item.description}</p>
+            ${item.type === "assignment" ? `<small>Due: ${item.dueDate}</small>` : ""}
+            <div class="actions">
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            </div>
+        `;
+
+        div.querySelector(".edit-btn").onclick = () => {
+            titleInput.value = item.title;
+            descriptionInput.value = item.description;
+            dueDateInput.value = item.dueDate || "";
+            typeSelect.value = item.type;
+            editId = item.id;
+        };
+
+        div.querySelector(".delete-btn").onclick = async () => {
+            if (confirm("Delete this item?")) {
+                await deleteDoc(doc(db, "classContent", item.id));
+            }
+        };
+
+        contentList.appendChild(div);
+    });
+}
+
+/* ----- Save / Edit ----- */
+saveBtn.onclick = async () => {
+    const data = {
+        classCode,
+        title: titleInput.value.trim(),
+        description: descriptionInput.value.trim(),
+        dueDate: typeSelect.value === "assignment" ? dueDateInput.value : "",
+        type: typeSelect.value,
+        createdAt: Date.now()
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // -------------------------------
-    // GET CLASS CODE FROM URL
-    // -------------------------------
-    const urlParams = new URLSearchParams(window.location.search);
-    const classCode = urlParams.get("code");
-    console.log("Class code from URL:", classCode);
-
-    // -------------------------------
-    // LOAD CLASS NAME FROM FIRESTORE
-    // -------------------------------
-    async function loadClassName() {
-      if (!classCode) {
-        document.getElementById("classHeader").innerText = "Class Not Found";
-        document.title = "Class Not Found";
+    if (!data.title || !data.description) {
+        alert("Please fill all fields");
         return;
-      }
-
-      try {
-        const classRef = doc(db, "classes", classCode);
-        const classSnap = await getDoc(classRef);
-
-        if (classSnap.exists()) {
-          const className = classSnap.data().name;
-          console.log("Loaded class name:", className);
-          document.title = className;
-          document.getElementById("classHeader").innerText = className;
-        } else {
-          console.warn("Class document does NOT exist for code:", classCode);
-          document.getElementById("classHeader").innerText = "Class Not Found";
-          document.title = "Class Not Found";
-        }
-      } catch (err) {
-        console.error("Error loading class from Firestore:", err);
-        document.getElementById("classHeader").innerText = "Error Loading Class";
-        document.title = "Error Loading Class";
-      }
     }
 
-    loadClassName();
-
-    // -------------------------------
-    // ASSIGNMENT LOGIC
-    // -------------------------------
-    const form = document.getElementById('assignmentForm');
-    const assignmentsContainer = document.getElementById('assignmentsContainer');
-
-    let assignments = JSON.parse(localStorage.getItem('assignments')) || [];
-
-    function renderAssignments() {
-      assignmentsContainer.innerHTML = '';
-      assignments.forEach((assignment, index) => {
-        const div = document.createElement('div');
-        div.className = 'assignment';
-        div.innerHTML = `
-          <h3>${assignment.title}</h3>
-          <p>${assignment.description}</p>
-          <small>Due: ${assignment.dueDate}</small>
-          <div class="actions">
-            <button class="edit">Edit</button>
-            <button class="delete">Delete</button>
-          </div>
-        `;
-        const editBtn = div.querySelector('.edit');
-        const deleteBtn = div.querySelector('.delete');
-
-        editBtn.addEventListener('click', () => editAssignment(index));
-        deleteBtn.addEventListener('click', () => deleteAssignment(index));
-
-        assignmentsContainer.appendChild(div);
-      });
+    if (editId) {
+        await updateDoc(doc(db, "classContent", editId), data);
+        editId = null;
+    } else {
+        await addDoc(collection(db, "classContent"), data);
     }
 
-    function addAssignment(e) {
-      e.preventDefault();
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const dueDate = document.getElementById('dueDate').value;
-      const editIndex = document.getElementById('editIndex').value;
+    titleInput.value = "";
+    descriptionInput.value = "";
+    dueDateInput.value = "";
+};
+</script>
 
-      if (editIndex === '') {
-        assignments.push({ title, description, dueDate });
-      } else {
-        assignments[editIndex] = { title, description, dueDate };
-      }
-
-      localStorage.setItem('assignments', JSON.stringify(assignments));
-      form.reset();
-      document.getElementById('editIndex').value = '';
-      renderAssignments();
-    }
-
-    function editAssignment(index) {
-      const assignment = assignments[index];
-      document.getElementById('title').value = assignment.title;
-      document.getElementById('description').value = assignment.description;
-      document.getElementById('dueDate').value = assignment.dueDate;
-      document.getElementById('editIndex').value = index;
-    }
-
-    function deleteAssignment(index) {
-      if (confirm('Are you sure you want to delete this assignment?')) {
-        assignments.splice(index, 1);
-        localStorage.setItem('assignments', JSON.stringify(assignments));
-        renderAssignments();
-      }
-    }
-
-    form.addEventListener('submit', addAssignment);
-    renderAssignments();
-  </script>
 </body>
 </html>
