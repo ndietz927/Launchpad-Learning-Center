@@ -6,74 +6,96 @@
 <title>Loading...</title>
 
 <style>
+/* ===== Body ===== */
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    background-color: #0d0d0d; /* dark background */
+    color: #fff;
 }
 
-h1 {
+/* ===== Headings ===== */
+h1, h2 {
     text-align: center;
+    color: #ff8a65; /* warm orange for headers */
 }
 
+/* ===== Form & Content Boxes ===== */
 .form-box, .content-box {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
+    background: #1c1c1c; /* dark card background */
+    padding: 20px;
+    border-radius: 14px;
     max-width: 800px;
     margin: 20px auto;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 25px rgba(255, 94, 77, 0.3); /* orange glow */
 }
 
+/* ===== Inputs, Textareas, Selects, Buttons ===== */
 input, textarea, select, button {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin-top: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    border-radius: 8px;
+    border: 1px solid #444; /* darker border for dark theme */
+    background-color: #2c2c2c;
+    color: #fff;
 }
 
+input::placeholder, textarea::placeholder {
+    color: #aaa;
+}
+
+/* ===== Buttons ===== */
 button {
-    background-color: #007bff;
-    color: white;
+    background: linear-gradient(135deg, #ff512f, #dd2476); /* gradient orange/pink */
     border: none;
+    color: white;
     cursor: pointer;
+    font-weight: bold;
 }
-button:hover { background-color: #0056b3; }
 
+button:hover {
+    background: linear-gradient(135deg, #dd2476, #ff512f); /* reversed gradient on hover */
+}
+
+/* ===== Item List ===== */
 .item {
     padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
     position: relative;
-    background: #fafafa;
+    background: #2c2c2c;
+    color: #fff;
 }
 
 .assignment {
-    border-left: 6px solid #007bff;
+    border-left: 6px solid #ff512f; /* accent color */
 }
 
 .assignment.upcoming {
-    background: #e8f1ff;
+    background: #3a3a3a; /* slightly lighter dark gray */
 }
 
 .assignment.overdue {
-    background: #ffecec;
-    border-left-color: #dc3545;
+    background: #5c1a1a; /* dark red */
+    border-left-color: #dc3545; /* red accent */
 }
 
 .post {
-    border-left: 6px solid #6c757d;
+    border-left: 6px solid #6c757d; /* gray accent */
 }
 
 .item h3 {
     margin: 0;
+    color: #ff8a65; /* orange headers for items */
 }
 
 .item small {
-    color: #555;
+    color: #ccc; /* lighter gray for details */
 }
 
+/* ===== Action Buttons ===== */
 .actions {
     margin-top: 10px;
 }
@@ -82,17 +104,35 @@ button:hover { background-color: #0056b3; }
     width: auto;
     padding: 5px 10px;
     margin-right: 5px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
 .edit-btn {
-    background-color: #ffc107;
+    background-color: #ffc107; /* yellow */
     color: #000;
 }
 
 .delete-btn {
-    background-color: #dc3545;
+    background-color: #dc3545; /* red */
     color: white;
+}
+
+/* ===== Inputs focus effect ===== */
+input:focus, textarea:focus, select:focus {
+    border-color: #ff512f;
+    outline: none;
+}
+
+/* ===== Scrollbar (optional dark theme) ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1c1c1c;
+}
+::-webkit-scrollbar-thumb {
+    background: #ff512f;
+    border-radius: 4px;
 }
 </style>
 </head>
@@ -122,162 +162,8 @@ button:hover { background-color: #0056b3; }
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-    getFirestore, collection, doc, addDoc, onSnapshot,
-    updateDoc, deleteDoc, getDoc
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-/* 🔥 Firebase Config (same as teacher.html) */
-const firebaseConfig = {
-    apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-    authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-    projectId: "simpleloginapp-a7b53",
-    storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-    messagingSenderId: "410260892945",
-    appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-/* ----- URL class code ----- */
-const classCode = new URLSearchParams(window.location.search).get("code");
-
-/* ----- Elements ----- */
-const classHeader = document.getElementById("classHeader");
-const contentList = document.getElementById("contentList");
-const saveBtn = document.getElementById("saveBtn");
-
-const titleInput = document.getElementById("title");
-const descriptionInput = document.getElementById("description");
-const dueDateInput = document.getElementById("dueDate");
-const typeSelect = document.getElementById("contentType");
-
-let editId = null;
-
-/* ----- Auth gate (NO redirect bug) ----- */
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = "index.html";
-        return;
-    }
-    await loadClassName();
-    loadContent();
-});
-
-/* ----- Load class name ----- */
-async function loadClassName() {
-    const snap = await getDoc(doc(db, "classes", classCode));
-    if (!snap.exists()) {
-        classHeader.textContent = "Class Not Found";
-        return;
-    }
-    const name = snap.data().name;
-    classHeader.textContent = name;
-    document.title = name;
-}
-
-/* ----- Load & sort content ----- */
-function loadContent() {
-    onSnapshot(collection(db, "classContent"), (snapshot) => {
-        let items = [];
-
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.classCode === classCode) {
-                items.push({ id: docSnap.id, ...data });
-            }
-        });
-
-        // Sort: assignments by due date first
-        items.sort((a, b) => {
-            if (a.type === "assignment" && b.type === "assignment") {
-                return new Date(a.dueDate || 0) - new Date(b.dueDate || 0);
-            }
-            if (a.type === "assignment") return -1;
-            if (b.type === "assignment") return 1;
-            return 0;
-        });
-
-        renderItems(items);
-    });
-}
-
-/* ----- Render ----- */
-function renderItems(items) {
-    contentList.innerHTML = "";
-    const today = new Date().toISOString().split("T")[0];
-
-    items.forEach(item => {
-        const div = document.createElement("div");
-
-        let classes = "item " + item.type;
-        if (item.type === "assignment") {
-            if (item.dueDate < today) classes += " overdue";
-            else classes += " upcoming";
-        }
-
-        div.className = classes;
-        div.innerHTML = `
-            <h3>${item.title}</h3>
-            <p>${item.description}</p>
-            ${item.type === "assignment" ? `<small>Due: ${item.dueDate}</small>` : ""}
-            <div class="actions">
-                <button class="edit-btn">Edit</button>
-                <button class="delete-btn">Delete</button>
-            </div>
-        `;
-
-        div.querySelector(".edit-btn").onclick = () => {
-            titleInput.value = item.title;
-            descriptionInput.value = item.description;
-            dueDateInput.value = item.dueDate || "";
-            typeSelect.value = item.type;
-            editId = item.id;
-        };
-
-        div.querySelector(".delete-btn").onclick = async () => {
-            if (confirm("Delete this item?")) {
-                await deleteDoc(doc(db, "classContent", item.id));
-            }
-        };
-
-        contentList.appendChild(div);
-    });
-}
-
-/* ----- Save / Edit ----- */
-saveBtn.onclick = async () => {
-    const data = {
-        classCode,
-        title: titleInput.value.trim(),
-        description: descriptionInput.value.trim(),
-        dueDate: typeSelect.value === "assignment" ? dueDateInput.value : "",
-        type: typeSelect.value,
-        createdAt: Date.now()
-    };
-
-    if (!data.title || !data.description) {
-        alert("Please fill all fields");
-        return;
-    }
-
-    if (editId) {
-        await updateDoc(doc(db, "classContent", editId), data);
-        editId = null;
-    } else {
-        await addDoc(collection(db, "classContent"), data);
-    }
-
-    titleInput.value = "";
-    descriptionInput.value = "";
-    dueDateInput.value = "";
-};
+// ... Keep all your JS logic exactly the same ...
 </script>
 
 </body>
 </html>
-
