@@ -31,40 +31,43 @@ input, textarea, select, button {
     padding: 8px;
     margin-top: 10px;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #444;
+    background-color: #2c2c2c;
+    color: #fff;
 }
 
 button {
-    background-color: #007bff;
+    background-color: linear-gradient(135deg, #ff512f, #dd2476);
     color: white;
     border: none;
     cursor: pointer;
 }
-button:hover { background-color: #0056b3; }
+button:hover { linear-gradient(135deg, #dd2476, #ff512f); }
 
 .item {
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 12px;
     position: relative;
-    background: #fafafa;
+    background: #2c2c2c;
+    color: #fff;
 }
 
 .assignment {
-    border-left: 6px solid #007bff;
+    border-left: 6px solid #ff512f;
 }
 
 .assignment.upcoming {
-    background: #e8f1ff;
+    background: #3a3a3a;
 }
 
 .assignment.overdue {
-    background: #ffecec;
-    border-left-color: #dc3545;
+    background: #5c1a1a; /* dark red */
+    border-left-color: #dc3545; /* red accent */
 }
 
 .post {
-    border-left: 6px solid #6c757d;
+    border-left: 6px solid #6c757d; /* gray accent */
 }
 
 .item h3 {
