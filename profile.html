@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Launchpad Student Profile</title>
 
 <!-- Bootstrap CSS -->
@@ -12,62 +12,26 @@
 />
 
 <style>
-body {
-  background-color: #0d0d0d;
-  color: #fff;
-  min-height: 100vh;
-}
-.navbar {
-  background-color: #1a1a1a !important;
-  box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
-}
-.navbar-brand img {
-  width: 120px;
-  margin-right: 14px;
-}
-.card {
-  background: #1c1c1c;
-  border-radius: 16px;
-  box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
-  color: #fff;
-}
-label {
-  color: #ffb199;
-  font-weight: 500;
-}
-input, select, textarea {
-  background-color: #2b2b2b !important;
-  color: #fff !important;
-  border: 1px solid #444 !important;
-}
-input::placeholder, textarea::placeholder {
-  color: #aaa;
-}
-.btn-primary {
-  background: linear-gradient(135deg, #ff512f, #dd2476);
-  border: none;
-}
-.btn-primary:hover {
-  background: linear-gradient(135deg, #dd2476, #ff512f);
-}
-.btn-danger {
-  background: #c62828;
-  border: none;
-}
-.btn-danger:hover {
-  background: #b71c1c;
-}
-.assignment-card {
-  background: #2c2c2c;
-  border-radius: 12px;
-  padding: 15px;
-}
+  body { background-color: #0d0d0d; color: #fff; min-height: 100vh; padding:20px;}
+  .navbar { background-color: #1a1a1a !important; box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3); }
+  .navbar-brand img { width:120px; margin-right:14px; }
+  .card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,0.3); color:#fff; }
+  label { color:#ffb199; font-weight:500; }
+  input, select, textarea { background-color:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
+  input::placeholder, textarea::placeholder { color:#aaa; }
+  .btn-primary { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; }
+  .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
+  .btn-danger { background: #c62828; border:none; }
+  .btn-danger:hover { background:#b71c1c; }
+  .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
+  .post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
+  .submit-btn { margin-top:10px; }
 </style>
 </head>
 
 <body>
 
-<!-- 🚀 Navbar -->
+<!-- Navbar -->
 <nav class="navbar navbar-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="#">
@@ -78,67 +42,214 @@ input::placeholder, textarea::placeholder {
   </div>
 </nav>
 
-<!-- 🚀 Main Content -->
-<div class="container pt-5 mt-5">
+<div style="margin-top:80px;" class="container">
+  <div class="col-md-6 mx-auto">
+    <div class="card p-4 text-center">
+      <h3 class="fw-bold mb-3" style="color:#ff8a65;">Student Profile</h3>
+      <p id="userEmail" class="text-muted mb-4"></p>
 
-  <!-- Profile Card -->
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card p-4 text-center">
-        <h3 class="fw-bold mb-3" style="color:#ff8a65;">Student Profile</h3>
-        <p id="userEmail" class="text-muted mb-4"></p>
-
-        <form id="profileForm" class="text-start">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label>First Name</label>
-              <input id="firstName" class="form-control" required />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label>Last Name</label>
-              <input id="lastName" class="form-control" required />
-            </div>
+      <form id="profileForm" class="text-start">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required />
           </div>
-
-          <div class="mb-3">
-            <label>Grade</label>
-            <select id="grade" class="form-select" required>
-              <option value="" disabled>Select your grade</option>
-              <option value="9">9th Grade</option>
-              <option value="10">10th Grade</option>
-              <option value="11">11th Grade</option>
-              <option value="12">12th Grade</option>
-            </select>
+          <div class="col-md-6 mb-3">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required />
           </div>
+        </div>
 
-          <div class="mb-3">
-            <label>Age</label>
-            <input id="age" type="number" class="form-control" required />
-          </div>
+        <div class="mb-3">
+          <label for="grade">Grade</label>
+          <select id="grade" class="form-select" required>
+            <option value="" disabled selected>Select your grade</option>
+            <option value="9">9th Grade</option>
+            <option value="10">10th Grade</option>
+            <option value="11">11th Grade</option>
+            <option value="12">12th Grade</option>
+          </select>
+        </div>
 
-          <div class="mb-3">
-            <label>Class Code</label>
-            <input id="classCode" class="form-control" required />
-          </div>
+        <div class="mb-3">
+          <label for="age">Age</label>
+          <input type="number" id="age" class="form-control" placeholder="Enter your age" required />
+        </div>
 
-          <button class="btn btn-primary w-100">Save / Join Class</button>
-        </form>
-      </div>
+        <div class="mb-3">
+          <label for="classCode">Class Code</label>
+          <input type="text" id="classCode" class="form-control" placeholder="Enter your class code" required />
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+          <button type="submit" id="save-btn" class="btn btn-primary">
+            Save Profile
+          </button>
+        </div>
+      </form>
+
+      <div id="classContentDiv" style="margin-top:30px;"></div>
     </div>
   </div>
-
-  <!-- Assignments -->
-  <div class="row justify-content-center mt-4">
-    <div class="col-md-10">
-      <div class="card p-4">
-        <h4 class="fw-bold mb-3" style="color:#ff8a65;">My Assignments</h4>
-        <div id="assignmentList">Join a class to see assignments.</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<script type="module" src="profile.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc,
+  collection, onSnapshot, addDoc
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+  projectId: "simpleloginapp-a7b53",
+  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+  messagingSenderId: "410260892945",
+  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const userEmail = document.getElementById("userEmail");
+const profileForm = document.getElementById("profileForm");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const firstNameInput = document.getElementById("firstName");
+const lastNameInput = document.getElementById("lastName");
+const gradeInput = document.getElementById("grade");
+const ageInput = document.getElementById("age");
+const classCodeInput = document.getElementById("classCode");
+
+const classContentDiv = document.getElementById("classContentDiv");
+
+let currentClassCode = "";
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  userEmail.textContent = `Logged in as: ${user.email}`;
+
+  const userRef = doc(db, "profiles", user.uid);
+  const docSnap = await getDoc(userRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    firstNameInput.value = data.firstName || "";
+    lastNameInput.value = data.lastName || "";
+    gradeInput.value = data.grade || "";
+    ageInput.value = data.age || "";
+    classCodeInput.value = data.classCode || "";
+
+    if (data.classCode) {
+      currentClassCode = data.classCode;
+      loadClassContent(currentClassCode, user.uid);
+    }
+  }
+
+  profileForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const firstName = firstNameInput.value;
+    const lastName = lastNameInput.value;
+    const grade = gradeInput.value;
+    const age = parseInt(ageInput.value);
+    const classCode = classCodeInput.value;
+
+    await setDoc(userRef, {
+      firstName, lastName, grade, age, classCode, email: user.email
+    });
+
+    alert("Profile saved successfully!");
+
+    if (classCode) {
+      currentClassCode = classCode;
+      loadClassContent(currentClassCode, user.uid);
+    }
+  });
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
+
+/* ----- Load class content and allow assignment submission ----- */
+function loadClassContent(classCode, studentUid) {
+  classContentDiv.innerHTML = `<h4 style="color:#ff8a65;">Class Content</h4><div id="studentContent"></div>`;
+  const studentContent = document.getElementById("studentContent");
+
+  // Assignments
+  const assignmentsRef = collection(db, "classes", classCode, "assignments");
+  onSnapshot(assignmentsRef, snapshot => {
+    studentContent.innerHTML = "";
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const assignmentId = docSnap.id;
+
+      const div = document.createElement("div");
+      div.className = "assignment";
+      div.innerHTML = `
+        <h5>${data.title}</h5>
+        <p>${data.description}</p>
+        <small>Due: ${data.dueDate || "N/A"}</small>
+      `;
+
+      // Submission button
+      const submitBtn = document.createElement("button");
+      submitBtn.className = "btn btn-primary submit-btn";
+      submitBtn.textContent = "Submit Assignment";
+      submitBtn.onclick = async () => {
+        const submission = prompt("Enter your submission (text or link):");
+        if (submission) {
+          await setDoc(doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid), {
+            submission,
+            submittedAt: new Date().toISOString(),
+            studentEmail: auth.currentUser.email
+          });
+          alert("Assignment submitted!");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Submitted";
+        }
+      };
+
+      // Check if already submitted
+      getDoc(doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid))
+        .then(snap => {
+          if (snap.exists()) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitted";
+          }
+        });
+
+      div.appendChild(submitBtn);
+      studentContent.appendChild(div);
+    });
+  });
+
+  // Posts
+  const postsRef = collection(db, "classes", classCode, "posts");
+  onSnapshot(postsRef, snapshot => {
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `
+        <h5>${data.title}</h5>
+        <p>${data.description}</p>
+      `;
+      studentContent.appendChild(div);
+    });
+  });
+}
+</script>
+
 </body>
 </html>
