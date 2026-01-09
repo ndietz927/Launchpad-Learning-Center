@@ -23,9 +23,14 @@
   .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
   .btn-danger { background: #c62828; border:none; }
   .btn-danger:hover { background:#b71c1c; }
-  .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
+  .assignment { border-left:6px solid #ff512f; margin-bottom:15px; padding:12px; border-radius:8px; }
   .post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
   .submit-btn { margin-top:10px; }
+  .grade-box {
+    margin-top: 8px;
+    font-weight: bold;
+    color: #8cff8c;
+  }
 </style>
 </head>
 
@@ -51,19 +56,19 @@
       <form id="profileForm" class="text-start">
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" class="form-control" placeholder="Enter your first name" required />
+            <label>First Name</label>
+            <input type="text" id="firstName" class="form-control" required />
           </div>
           <div class="col-md-6 mb-3">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" class="form-control" placeholder="Enter your last name" required />
+            <label>Last Name</label>
+            <input type="text" id="lastName" class="form-control" required />
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="grade">Grade</label>
+          <label>Grade</label>
           <select id="grade" class="form-select" required>
-            <option value="" disabled selected>Select your grade</option>
+            <option value="" disabled>Select your grade</option>
             <option value="9">9th Grade</option>
             <option value="10">10th Grade</option>
             <option value="11">11th Grade</option>
@@ -72,19 +77,17 @@
         </div>
 
         <div class="mb-3">
-          <label for="age">Age</label>
-          <input type="number" id="age" class="form-control" placeholder="Enter your age" required />
+          <label>Age</label>
+          <input type="number" id="age" class="form-control" required />
         </div>
 
         <div class="mb-3">
-          <label for="classCode">Class Code</label>
-          <input type="text" id="classCode" class="form-control" placeholder="Enter your class code" required />
+          <label>Class Code</label>
+          <input type="text" id="classCode" class="form-control" required />
         </div>
 
         <div class="d-grid gap-2 mt-4">
-          <button type="submit" id="save-btn" class="btn btn-primary">
-            Save Profile
-          </button>
+          <button type="submit" class="btn btn-primary">Save Profile</button>
         </div>
       </form>
 
@@ -100,7 +103,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc,
-  collection, onSnapshot, addDoc
+  collection, onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -125,10 +128,7 @@ const lastNameInput = document.getElementById("lastName");
 const gradeInput = document.getElementById("grade");
 const ageInput = document.getElementById("age");
 const classCodeInput = document.getElementById("classCode");
-
 const classContentDiv = document.getElementById("classContentDiv");
-
-let currentClassCode = "";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -139,10 +139,10 @@ onAuthStateChanged(auth, async (user) => {
   userEmail.textContent = `Logged in as: ${user.email}`;
 
   const userRef = doc(db, "profiles", user.uid);
-  const docSnap = await getDoc(userRef);
+  const snap = await getDoc(userRef);
 
-  if (docSnap.exists()) {
-    const data = docSnap.data();
+  if (snap.exists()) {
+    const data = snap.data();
     firstNameInput.value = data.firstName || "";
     lastNameInput.value = data.lastName || "";
     gradeInput.value = data.grade || "";
@@ -150,102 +150,108 @@ onAuthStateChanged(auth, async (user) => {
     classCodeInput.value = data.classCode || "";
 
     if (data.classCode) {
-      currentClassCode = data.classCode;
-      loadClassContent(currentClassCode, user.uid);
+      loadClassContent(data.classCode, user.uid);
     }
   }
 
-  profileForm.addEventListener("submit", async (e) => {
+  profileForm.onsubmit = async (e) => {
     e.preventDefault();
-    const firstName = firstNameInput.value;
-    const lastName = lastNameInput.value;
-    const grade = gradeInput.value;
-    const age = parseInt(ageInput.value);
-    const classCode = classCodeInput.value;
-
     await setDoc(userRef, {
-      firstName, lastName, grade, age, classCode, email: user.email
+      firstName: firstNameInput.value,
+      lastName: lastNameInput.value,
+      grade: gradeInput.value,
+      age: ageInput.value,
+      classCode: classCodeInput.value,
+      email: user.email
     });
-
-    alert("Profile saved successfully!");
-
-    if (classCode) {
-      currentClassCode = classCode;
-      loadClassContent(currentClassCode, user.uid);
-    }
-  });
+    alert("Profile saved!");
+    loadClassContent(classCodeInput.value, user.uid);
+  };
 });
 
-logoutBtn.addEventListener("click", async () => {
+logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
-});
+};
 
-/* ----- Load class content and allow assignment submission ----- */
+/* ---------------- LOAD CLASS CONTENT ---------------- */
 function loadClassContent(classCode, studentUid) {
-  classContentDiv.innerHTML = `<h4 style="color:#ff8a65;">Class Content</h4><div id="studentContent"></div>`;
+  classContentDiv.innerHTML = `
+    <h4 style="color:#ff8a65;">Class Assignments</h4>
+    <div id="studentContent"></div>
+  `;
+
   const studentContent = document.getElementById("studentContent");
 
-  // Assignments
   const assignmentsRef = collection(db, "classes", classCode, "assignments");
+
   onSnapshot(assignmentsRef, snapshot => {
     studentContent.innerHTML = "";
+
     snapshot.forEach(docSnap => {
       const data = docSnap.data();
       const assignmentId = docSnap.id;
 
       const div = document.createElement("div");
       div.className = "assignment";
+
       div.innerHTML = `
         <h5>${data.title}</h5>
         <p>${data.description}</p>
         <small>Due: ${data.dueDate || "N/A"}</small>
+        <div class="grade-box" id="grade-${assignmentId}">Grade: Not graded</div>
       `;
 
-      // Submission button
       const submitBtn = document.createElement("button");
       submitBtn.className = "btn btn-primary submit-btn";
       submitBtn.textContent = "Submit Assignment";
+
       submitBtn.onclick = async () => {
         const submission = prompt("Enter your submission (text or link):");
-        if (submission) {
-          await setDoc(doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid), {
+        if (!submission) return;
+
+        await setDoc(
+          doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid),
+          {
             submission,
             submittedAt: new Date().toISOString(),
             studentEmail: auth.currentUser.email
-          });
-          alert("Assignment submitted!");
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Submitted";
-        }
-      };
-
-      // Check if already submitted
-      getDoc(doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid))
-        .then(snap => {
-          if (snap.exists()) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Submitted";
           }
-        });
+        );
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitted";
+      };
 
       div.appendChild(submitBtn);
       studentContent.appendChild(div);
-    });
-  });
 
-  // Posts
-  const postsRef = collection(db, "classes", classCode, "posts");
-  onSnapshot(postsRef, snapshot => {
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <h5>${data.title}</h5>
-        <p>${data.description}</p>
-      `;
-      studentContent.appendChild(div);
+      /* 🔎 LIVE LISTEN FOR STUDENT SUBMISSION + GRADE */
+      const submissionRef = doc(
+        db,
+        "classes",
+        classCode,
+        "assignments",
+        assignmentId,
+        "submissions",
+        studentUid
+      );
+
+      onSnapshot(submissionRef, snap => {
+        if (snap.exists()) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Submitted";
+
+          const submissionData = snap.data();
+          const gradeDiv = document.getElementById(`grade-${assignmentId}`);
+
+          if (submissionData.grade) {
+            gradeDiv.textContent = `Grade: ${submissionData.grade}`;
+          } else {
+            gradeDiv.textContent = "Grade: Pending";
+          }
+        }
+      });
     });
   });
 }
