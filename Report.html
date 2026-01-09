@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Launchpad Admin Dashboard</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #0d0d0d;
+        color: #fff;
+        min-height: 100vh;
+      }
+      .navbar {
+        background-color: #1a1a1a !important;
+        box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
+      }
+      .navbar-brand img {
+        width: 120px;
+        margin-right: 14px;
+      }
+      .card {
+        background: #1c1c1c;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
+        color: #fff;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        border: none;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #dd2476, #ff512f);
+      }
+      .btn-danger {
+        background: #c62828;
+        border: none;
+      }
+      .btn-danger:hover {
+        background: #b71c1c;
+      }
+    </style>
+  </head>
+
+  <body>
+     
+               
+               
+            
+        </div>
+    <nav class="navbar navbar-dark fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <img src="Launchpad Learning Center.png" alt="Logo" />
+          <span class="fw-bold fs-4">Launchpad Admin Panel</span>
+        </a>
+        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+      </div>
+    </nav>
+
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+      <div class="col-md-6">
+        <div class="card p-4 text-center">
+          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Manage users!</h3>
+          <p id="adminEmail" class="text-muted mb-4"></p>
+         
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary">Add Report</button>
+             <a href="../admin.html" class="btn btn-primary">Home</a>
+            </button>
+
+ 
+          
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+        authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+        projectId: "simpleloginapp-a7b53",
+        storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+        messagingSenderId: "410260892945",
+        appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      const adminEmail = document.getElementById("adminEmail");
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== "admin") {
+          alert("Access denied. Admins only.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        adminEmail.textContent = `Logged in as: ${user.email}`;
+      });
+
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "index.html";
+      });
+    </script>
+  </body>
+</html>
