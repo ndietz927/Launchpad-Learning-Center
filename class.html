@@ -68,7 +68,6 @@ button:hover {
 .delete-btn { background: #dc3545; }
 .view-submissions-btn { background: #0dcaf0; color: #000; }
 .save-grade-btn { background: #198754; }
-
 </style>
 </head>
 
@@ -106,8 +105,14 @@ button:hover {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
-    getFirestore, collection, doc, addDoc, onSnapshot,
-    updateDoc, deleteDoc, getDoc
+    getFirestore,
+    collection,
+    doc,
+    addDoc,
+    onSnapshot,
+    updateDoc,
+    deleteDoc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -126,6 +131,7 @@ const auth = getAuth(app);
 
 const classCode = new URLSearchParams(window.location.search).get("code");
 
+/* ---------- DOM ---------- */
 const classHeader = document.getElementById("classHeader");
 const contentList = document.getElementById("contentList");
 const submissionPanel = document.getElementById("submissionPanel");
@@ -138,41 +144,48 @@ const typeSelect = document.getElementById("contentType");
 
 let editId = null;
 
+/* ---------- AUTH ---------- */
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "index.html";
         return;
     }
+
     await loadClassName();
-    loadContent();
+    loadAssignments();
 });
 
+/* ---------- LOAD CLASS ---------- */
 async function loadClassName() {
     const snap = await getDoc(doc(db, "classes", classCode));
     if (!snap.exists()) {
         classHeader.textContent = "Class Not Found";
         return;
     }
+
     const name = snap.data().name;
     classHeader.textContent = name;
     document.title = name;
 }
 
-function loadContent() {
-    onSnapshot(collection(db, "classContent"), (snapshot) => {
-        let items = [];
+/* ---------- ASSIGNMENTS COLLECTION ---------- */
+function assignmentsRef() {
+    return collection(db, "classes", classCode, "assignments");
+}
 
+/* ---------- LOAD ASSIGNMENTS ---------- */
+function loadAssignments() {
+    onSnapshot(assignmentsRef(), (snapshot) => {
+        const items = [];
         snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.classCode === classCode) {
-                items.push({ id: docSnap.id, ...data });
-            }
+            items.push({ id: docSnap.id, ...docSnap.data() });
         });
 
         renderItems(items);
     });
 }
 
+/* ---------- RENDER ---------- */
 function renderItems(items) {
     contentList.innerHTML = "";
 
@@ -203,7 +216,7 @@ function renderItems(items) {
 
         div.querySelector(".delete-btn").onclick = async () => {
             if (confirm("Delete this item?")) {
-                await deleteDoc(doc(db, "classContent", item.id));
+                await deleteDoc(doc(db, "classes", classCode, "assignments", item.id));
             }
         };
 
@@ -216,12 +229,15 @@ function renderItems(items) {
     });
 }
 
+/* ---------- LOAD SUBMISSIONS ---------- */
 function loadSubmissions(assignmentId, title) {
     submissionPanel.innerHTML = `<h3>Submissions for: ${title}</h3>`;
 
     const submissionsRef = collection(
         db,
-        "classContent",
+        "classes",
+        classCode,
+        "assignments",
         assignmentId,
         "submissions"
     );
@@ -245,7 +261,7 @@ function loadSubmissions(assignmentId, title) {
                 <p><strong>Submission:</strong> ${data.submission}</p>
 
                 <label>Grade</label>
-                <input type="text" id="grade-${studentId}" value="${data.grade || ""}" />
+                <input id="grade-${studentId}" value="${data.grade || ""}" />
 
                 <label>Feedback</label>
                 <textarea id="feedback-${studentId}">${data.feedback || ""}</textarea>
@@ -259,7 +275,15 @@ function loadSubmissions(assignmentId, title) {
                 const feedback = document.getElementById(`feedback-${studentId}`).value;
 
                 await updateDoc(
-                    doc(db, "classContent", assignmentId, "submissions", studentId),
+                    doc(
+                        db,
+                        "classes",
+                        classCode,
+                        "assignments",
+                        assignmentId,
+                        "submissions",
+                        studentId
+                    ),
                     {
                         grade,
                         feedback,
@@ -275,9 +299,9 @@ function loadSubmissions(assignmentId, title) {
     });
 }
 
+/* ---------- SAVE ASSIGNMENT ---------- */
 saveBtn.onclick = async () => {
     const data = {
-        classCode,
         title: titleInput.value.trim(),
         description: descriptionInput.value.trim(),
         dueDate: typeSelect.value === "assignment" ? dueDateInput.value : "",
@@ -291,10 +315,13 @@ saveBtn.onclick = async () => {
     }
 
     if (editId) {
-        await updateDoc(doc(db, "classContent", editId), data);
+        await updateDoc(
+            doc(db, "classes", classCode, "assignments", editId),
+            data
+        );
         editId = null;
     } else {
-        await addDoc(collection(db, "classContent"), data);
+        await addDoc(assignmentsRef(), data);
     }
 
     titleInput.value = "";
