@@ -46,7 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
   registerBtn.addEventListener("click", async () => {
     const email = emailInput.value;
     const password = passwordInput.value;
-    const role = roleSelect.value;
+    let role = roleSelect.value;
+
+// Prevent admin self-registration
+if (role === "admin") {
+  role = "student";
+}
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -122,4 +127,43 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "profile.html"; // student
     }
   }
+
+  import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+// ADMIN: Load all users
+async function loadAllUsers() {
+  const usersList = document.getElementById("usersList");
+  if (!usersList) return;
+
+  const snapshot = await getDocs(collection(db, "users"));
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+    li.textContent = `${data.email} — ${data.role}`;
+    usersList.appendChild(li);
+  });
+}
+  // Protect admin page
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+
+  const adminList = document.getElementById("usersList");
+  if (!adminList) return; // not on admin page
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  const role = userDoc.data().role;
+
+  if (role !== "admin") {
+    alert("Access denied");
+    window.location.href = "index.html";
+    return;
+  }
+
+  loadAllUsers();
+});
+  
 });
