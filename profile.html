@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Launchpad Student Profile</title>
 
+<!-- Bootstrap CSS -->
 <link
   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
   rel="stylesheet"
@@ -17,27 +18,24 @@
   .card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,0.3); color:#fff; }
   label { color:#ffb199; font-weight:500; }
   input, select, textarea { background-color:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
+  input::placeholder, textarea::placeholder { color:#aaa; }
   .btn-primary { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; }
+  .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
   .btn-danger { background: #c62828; border:none; }
-  .assignment { border-left:6px solid #ff512f; margin-bottom:15px; padding:12px; border-radius:8px; }
+  .btn-danger:hover { background:#b71c1c; }
+  .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
+  .post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
   .submit-btn { margin-top:10px; }
-  .grade-box { margin-top: 8px; font-weight: bold; color: #8cff8c; }
-  .class-info {
-    background:#2a2a2a;
-    border-radius:10px;
-    padding:12px;
-    margin-bottom:15px;
-    text-align:center;
-  }
 </style>
 </head>
 
 <body>
 
+<!-- Navbar -->
 <nav class="navbar navbar-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="Launchpad Learning Center.png" />
+      <img src="Launchpad Learning Center.png" alt="Logo" />
       <span class="fw-bold fs-4">Launchpad Learning Center</span>
     </a>
     <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
@@ -45,11 +43,12 @@
 </nav>
 
 <div style="margin-top:80px;" class="container">
-  <div class="col-md-7 mx-auto">
+  <div class="col-md-6 mx-auto">
     <div class="card p-4 text-center">
       <h3 class="fw-bold mb-3" style="color:#ff8a65;">Student Profile</h3>
       <p id="userEmail" class="text-muted mb-4"></p>
 
+      <!-- Profile Form -->
       <form id="profileForm" class="text-start">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -65,11 +64,11 @@
         <div class="mb-3">
           <label>Grade</label>
           <select id="grade" class="form-select" required>
-            <option value="" disabled>Select your grade</option>
-            <option value="9">9th Grade</option>
-            <option value="10">10th Grade</option>
-            <option value="11">11th Grade</option>
-            <option value="12">12th Grade</option>
+            <option value="">Select grade</option>
+            <option value="9">9th</option>
+            <option value="10">10th</option>
+            <option value="11">11th</option>
+            <option value="12">12th</option>
           </select>
         </div>
 
@@ -83,9 +82,10 @@
           <input type="text" id="classCode" class="form-control" required />
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Save Profile</button>
+        <button class="btn btn-primary w-100">Save Profile</button>
       </form>
 
+      <!-- Class Content -->
       <div id="classContentDiv" style="margin-top:30px;"></div>
     </div>
   </div>
@@ -95,8 +95,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc,
-  collection, onSnapshot
+  getFirestore, doc, setDoc, getDoc, collection,
+  onSnapshot, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -112,147 +112,154 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* Elements */
 const userEmail = document.getElementById("userEmail");
 const profileForm = document.getElementById("profileForm");
 const logoutBtn = document.getElementById("logoutBtn");
-
-const firstNameInput = document.getElementById("firstName");
-const lastNameInput = document.getElementById("lastName");
-const gradeInput = document.getElementById("grade");
-const ageInput = document.getElementById("age");
-const classCodeInput = document.getElementById("classCode");
 const classContentDiv = document.getElementById("classContentDiv");
 
+let currentClassCode = "";
+
+/* Auth */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return window.location.href = "index.html";
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
   userEmail.textContent = `Logged in as: ${user.email}`;
   const userRef = doc(db, "profiles", user.uid);
   const snap = await getDoc(userRef);
 
   if (snap.exists()) {
-    const data = snap.data();
-    firstNameInput.value = data.firstName || "";
-    lastNameInput.value = data.lastName || "";
-    gradeInput.value = data.grade || "";
-    ageInput.value = data.age || "";
-    classCodeInput.value = data.classCode || "";
+    const d = snap.data();
+    firstName.value = d.firstName || "";
+    lastName.value = d.lastName || "";
+    grade.value = d.grade || "";
+    age.value = d.age || "";
+    classCode.value = d.classCode || "";
 
-    if (data.classCode) {
-      loadClass(data.classCode, user.uid);
+    if (d.classCode) {
+      currentClassCode = d.classCode;
+      loadClassContent(currentClassCode, user.uid);
     }
   }
 
   profileForm.onsubmit = async (e) => {
     e.preventDefault();
+
     await setDoc(userRef, {
-      firstName: firstNameInput.value,
-      lastName: lastNameInput.value,
-      grade: gradeInput.value,
-      age: ageInput.value,
-      classCode: classCodeInput.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      grade: grade.value,
+      age: parseInt(age.value),
+      classCode: classCode.value,
       email: user.email
     });
+
+    currentClassCode = classCode.value;
+    loadClassContent(currentClassCode, user.uid);
     alert("Profile saved!");
-    loadClass(classCodeInput.value, user.uid);
   };
 });
 
+/* Logout */
 logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
 };
 
-/* ---------------- LOAD CLASS + TEACHER ---------------- */
-async function loadClass(classCode, studentUid) {
-  classContentDiv.innerHTML = "";
-
-  const classSnap = await getDoc(doc(db, "classes", classCode));
-  if (!classSnap.exists()) return;
-
-  const classData = classSnap.data();
-
-  let teacherName = "Unknown Teacher";
-
-  if (classData.teacherUid) {
-    const teacherSnap = await getDoc(doc(db, "teacherProfiles", classData.teacherUid));
-    if (teacherSnap.exists()) {
-      const t = teacherSnap.data();
-      teacherName = `${t.firstName} ${t.lastName}`;
-    }
-  }
-
+/* Load Class + Teacher + Assignments */
+async function loadClassContent(classCode, studentUid) {
   classContentDiv.innerHTML = `
-    <div class="class-info">
-      <h5>${classData.name}</h5>
-      <div>Teacher: ${teacherName}</div>
-    </div>
+    <div id="classHeaderInfo" class="mb-3"></div>
+    <h4 style="color:#ff8a65;">Assignments</h4>
     <div id="studentContent"></div>
   `;
 
-  loadAssignments(classCode, studentUid);
-}
-
-/* ---------------- ASSIGNMENTS + GRADES ---------------- */
-function loadAssignments(classCode, studentUid) {
+  const headerDiv = document.getElementById("classHeaderInfo");
   const studentContent = document.getElementById("studentContent");
+
+  const classSnap = await getDoc(doc(db, "classes", classCode));
+  if (!classSnap.exists()) {
+    headerDiv.innerHTML = `<p class="text-danger">Class not found.</p>`;
+    return;
+  }
+
+  const classData = classSnap.data();
+  let teacherName = "Unknown Teacher";
+
+  if (classData.teacherEmail) {
+    const q = query(collection(db, "teacherProfiles"), where("email", "==", classData.teacherEmail));
+    const result = await getDocs(q);
+    if (!result.empty) {
+      const t = result.docs[0].data();
+      teacherName = `${t.title || ""} ${t.firstName || ""} ${t.lastName || ""}`;
+    }
+  }
+
+  headerDiv.innerHTML = `
+    <div class="p-3 mb-3" style="background:#222;border-radius:10px;">
+      <strong>Class:</strong> ${classData.name}<br/>
+      <strong>Teacher:</strong> ${teacherName}
+    </div>
+  `;
+
   const assignmentsRef = collection(db, "classes", classCode, "assignments");
 
-  onSnapshot(assignmentsRef, snapshot => {
+  onSnapshot(assignmentsRef, (snapshot) => {
     studentContent.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
+    snapshot.forEach((docSnap) => {
+      const a = docSnap.data();
       const assignmentId = docSnap.id;
 
       const div = document.createElement("div");
       div.className = "assignment";
       div.innerHTML = `
-        <h5>${data.title}</h5>
-        <p>${data.description}</p>
-        <small>Due: ${data.dueDate || "N/A"}</small>
-        <div class="grade-box" id="grade-${assignmentId}">Grade: Pending</div>
+        <h5>${a.title}</h5>
+        <p>${a.description}</p>
+        <small>Due: ${a.dueDate || "N/A"}</small>
+        <div class="grade mt-2"></div>
       `;
+
+      const gradeDiv = div.querySelector(".grade");
+
+      const submissionRef = doc(
+        db, "classes", classCode, "assignments", assignmentId,
+        "submissions", studentUid
+      );
+
+      onSnapshot(submissionRef, (snap) => {
+        if (snap.exists()) {
+          const sub = snap.data();
+          gradeDiv.innerHTML = sub.grade
+            ? `✅ Grade: <strong>${sub.grade}</strong>`
+            : "⏳ Awaiting grade";
+        }
+      });
 
       const submitBtn = document.createElement("button");
       submitBtn.className = "btn btn-primary submit-btn";
-      submitBtn.textContent = "Submit Assignment";
+      submitBtn.textContent = "Submit";
 
       submitBtn.onclick = async () => {
-        const submission = prompt("Enter your submission:");
+        const submission = prompt("Paste your submission:");
         if (!submission) return;
 
-        await setDoc(
-          doc(db, "classes", classCode, "assignments", assignmentId, "submissions", studentUid),
-          {
-            submission,
-            submittedAt: new Date().toISOString(),
-            studentEmail: auth.currentUser.email
-          }
-        );
+        await setDoc(submissionRef, {
+          submission,
+          submittedAt: new Date().toISOString(),
+          studentEmail: auth.currentUser.email,
+          grade: ""
+        });
 
+        alert("Submitted!");
         submitBtn.disabled = true;
-        submitBtn.textContent = "Submitted";
       };
 
       div.appendChild(submitBtn);
       studentContent.appendChild(div);
-
-      const submissionRef = doc(
-        db, "classes", classCode, "assignments",
-        assignmentId, "submissions", studentUid
-      );
-
-      onSnapshot(submissionRef, snap => {
-        if (snap.exists()) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Submitted";
-          const grade = snap.data().grade;
-          if (grade) {
-            document.getElementById(`grade-${assignmentId}`).textContent = `Grade: ${grade}`;
-          }
-        }
-      });
     });
   });
 }
