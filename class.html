@@ -3,180 +3,428 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Class Dashboard</title>
-<link
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-  rel="stylesheet"
-/>
+<title>Loading...</title>
+
 <style>
-body { font-family: Arial, sans-serif; background:#0d0d0d; color:#fff; margin:0; padding:20px; }
-h1,h2,h3,h4 { color:#ff8a65; text-align:center; }
-.card, .roster-card { background:#1c1c1c; padding:20px; border-radius:14px; margin:20px auto; max-width:800px; box-shadow:0 0 25px rgba(255,94,77,0.3);}
-input, textarea, select, button { width:100%; padding:10px; margin-top:10px; border-radius:8px; border:1px solid #444; background:#2c2c2c; color:#fff; }
-button { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; color:#fff; font-weight:bold; cursor:pointer; }
-button:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
-.assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
-.post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
-.submit-btn { margin-top:10px; }
-table { width:100%; color:#fff; border-collapse: collapse; }
-th,td { padding:8px; border-bottom:1px solid #444; text-align:left; }
-th { color:#ff8a65; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #0d0d0d;
+    color: #fff;
+}
+
+h1, h2, h3 {
+    text-align: center;
+    color: #ff8a65;
+}
+
+.form-box, .content-box {
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 14px;
+    max-width: 900px;
+    margin: 20px auto;
+    box-shadow: 0 0 25px rgba(255, 94, 77, 0.3);
+}
+
+input, textarea, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: #2c2c2c;
+    color: #fff;
+}
+
+button {
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #dd2476, #ff512f);
+}
+
+.item {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    background: #2c2c2c;
+}
+
+.assignment { border-left: 6px solid #ff512f; }
+.post { border-left: 6px solid #6c757d; }
+
+.actions button {
+    width: auto;
+    margin-right: 5px;
+}
+
+.edit-btn { background: #ffc107; color: #000; }
+.delete-btn { background: #dc3545; }
+.view-submissions-btn { background: #0dcaf0; color: #000; }
+.save-grade-btn { background: #198754; }
+
+#rosterTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+#rosterTable th, #rosterTable td {
+    border: 1px solid #444;
+    padding: 8px;
+    text-align: center;
+}
+#rosterTable th {
+    background-color: #333;
+}
 </style>
 </head>
 
 <body>
 
-<h1 id="classHeader">Loading Class...</h1>
+<h1 id="classHeader">Loading...</h1>
 
-<div class="card">
-  <h2>Create Assignment / Post</h2>
-  <select id="contentType">
-    <option value="assignment">Assignment</option>
-    <option value="post">Post</option>
-  </select>
-  <input type="text" id="title" placeholder="Title" />
-  <textarea id="description" placeholder="Description"></textarea>
-  <input type="date" id="dueDate" />
-  <button id="saveBtn">Upload</button>
+<div class="form-box">
+    <h2>Create Assignment / Post</h2>
+
+    <select id="contentType">
+        <option value="assignment">Assignment</option>
+        <option value="post">Post</option>
+    </select>
+
+    <input type="text" id="title" placeholder="Title" />
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="date" id="dueDate" />
+
+    <button id="saveBtn">Upload</button>
 </div>
 
-<div class="card">
-  <h2>Class Content</h2>
-  <div id="contentList"></div>
+<div class="content-box">
+    <h2>Class Content</h2>
+    <div id="contentList"></div>
 </div>
 
-<div class="roster-card">
-  <h2>Student Roster & Grade Averages</h2>
-  <table id="rosterTable">
-    <thead>
-      <tr>
-        <th>Student</th>
-        <th>Email</th>
-        <th>Average Grade</th>
-      </tr>
-    </thead>
-    <tbody id="rosterBody"></tbody>
-  </table>
+<div class="content-box">
+    <h2>Student Submissions</h2>
+    <div id="submissionPanel">
+        <p style="color:#aaa;">Select an assignment to view submissions.</p>
+    </div>
+</div>
+
+<div class="content-box">
+    <h2>Student Roster & Grade Averages</h2>
+    <div id="rosterPanel">
+        <p style="color:#aaa;">Roster will appear here.</p>
+        <table id="rosterTable">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Assignments Submitted</th>
+                    <th>Average Grade</th>
+                </tr>
+            </thead>
+            <tbody id="rosterBody"></tbody>
+        </table>
+    </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
-  getFirestore, doc, collection, addDoc, onSnapshot,
-  getDocs, setDoc, getDoc
+    getFirestore,
+    collection,
+    doc,
+    addDoc,
+    onSnapshot,
+    updateDoc,
+    deleteDoc,
+    getDoc,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-  projectId: "simpleloginapp-a7b53",
-  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-  messagingSenderId: "410260892945",
-  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+    apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+    authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+    projectId: "simpleloginapp-a7b53",
+    storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+    messagingSenderId: "410260892945",
+    appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* ----- Elements ----- */
+const classCode = new URLSearchParams(window.location.search).get("code");
+
+/* ---------- DOM ---------- */
 const classHeader = document.getElementById("classHeader");
 const contentList = document.getElementById("contentList");
+const submissionPanel = document.getElementById("submissionPanel");
+const rosterBody = document.getElementById("rosterBody");
+
 const saveBtn = document.getElementById("saveBtn");
 const titleInput = document.getElementById("title");
 const descriptionInput = document.getElementById("description");
 const dueDateInput = document.getElementById("dueDate");
 const typeSelect = document.getElementById("contentType");
 
-const rosterBody = document.getElementById("rosterBody");
-
 let editId = null;
-const classCode = new URLSearchParams(window.location.search).get("code");
 
-/* ----- Auth ----- */
+/* ---------- AUTH ---------- */
 onAuthStateChanged(auth, async (user) => {
-  if(!user) { window.location.href="index.html"; return; }
+    if (!user) {
+        window.location.href = "index.html";
+        return;
+    }
 
-  await loadClassInfo();
-  loadContent();
-  loadRoster();
+    await loadClassName();
+    loadAssignments();
+    loadRoster();
 });
 
-/* ----- Load Class Info ----- */
-async function loadClassInfo() {
-  const snap = await getDoc(doc(db, "classes", classCode));
-  if(!snap.exists()) {
-    classHeader.textContent = "Class Not Found";
-    return;
-  }
-  classHeader.textContent = snap.data().name;
+/* ---------- LOAD CLASS ---------- */
+async function loadClassName() {
+    const snap = await getDoc(doc(db, "classes", classCode));
+    if (!snap.exists()) {
+        classHeader.textContent = "Class Not Found";
+        return;
+    }
+
+    const name = snap.data().name;
+    classHeader.textContent = name;
+    document.title = name;
 }
 
-/* ----- Load & Render Content ----- */
-function loadContent() {
-  const assignmentsRef = collection(db, "classes", classCode, "assignments");
-  onSnapshot(assignmentsRef, snapshot => {
-    contentList.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const data = docSnap.data();
-      const div = document.createElement("div");
-      div.className = data.type==="assignment" ? "assignment" : "post";
-      div.innerHTML = `<h4>${data.title}</h4><p>${data.description}</p><small>Due: ${data.dueDate||"N/A"}</small>`;
-      contentList.appendChild(div);
+/* ---------- ASSIGNMENTS COLLECTION ---------- */
+function assignmentsRef() {
+    return collection(db, "classes", classCode, "assignments");
+}
+
+/* ---------- LOAD ASSIGNMENTS ---------- */
+function loadAssignments() {
+    onSnapshot(assignmentsRef(), (snapshot) => {
+        const items = [];
+        snapshot.forEach(docSnap => {
+            items.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        renderItems(items);
     });
-  });
 }
 
-/* ----- Create Assignment/Post ----- */
+/* ---------- RENDER ---------- */
+function renderItems(items) {
+    contentList.innerHTML = "";
+
+    items.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "item " + item.type;
+
+        div.innerHTML = `
+            <h3>${item.title}</h3>
+            <p>${item.description}</p>
+            ${item.type === "assignment" ? `<small>Due: ${item.dueDate}</small>` : ""}
+            <div class="actions">
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+                ${item.type === "assignment" 
+                    ? `<button class="view-submissions-btn">View Submissions</button>` 
+                    : ""}
+            </div>
+        `;
+
+        div.querySelector(".edit-btn").onclick = () => {
+            titleInput.value = item.title;
+            descriptionInput.value = item.description;
+            dueDateInput.value = item.dueDate || "";
+            typeSelect.value = item.type;
+            editId = item.id;
+        };
+
+        div.querySelector(".delete-btn").onclick = async () => {
+            if (confirm("Delete this item?")) {
+                await deleteDoc(doc(db, "classes", classCode, "assignments", item.id));
+            }
+        };
+
+        const viewBtn = div.querySelector(".view-submissions-btn");
+        if (viewBtn) {
+            viewBtn.onclick = () => loadSubmissions(item.id, item.title);
+        }
+
+        contentList.appendChild(div);
+    });
+}
+
+/* ---------- LOAD SUBMISSIONS ---------- */
+function loadSubmissions(assignmentId, title) {
+    submissionPanel.innerHTML = `<h3>Submissions for: ${title}</h3>`;
+
+    const submissionsRef = collection(
+        db,
+        "classes",
+        classCode,
+        "assignments",
+        assignmentId,
+        "submissions"
+    );
+
+    onSnapshot(submissionsRef, (snapshot) => {
+        submissionPanel.innerHTML = `<h3>Submissions for: ${title}</h3>`;
+
+        if (snapshot.empty) {
+            submissionPanel.innerHTML += `<p style="color:#aaa;">No submissions yet.</p>`;
+            return;
+        }
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const studentId = docSnap.id;
+
+            const div = document.createElement("div");
+            div.className = "item";
+            div.innerHTML = `
+                <p><strong>Student:</strong> ${data.studentEmail}</p>
+                <p><strong>Submission:</strong> ${data.submission}</p>
+
+                <label>Grade</label>
+                <input id="grade-${studentId}" value="${data.grade || ""}" />
+
+                <label>Feedback</label>
+                <textarea id="feedback-${studentId}">${data.feedback || ""}</textarea>
+
+                <button class="save-grade-btn">Save Grade</button>
+                <hr/>
+            `;
+
+            div.querySelector(".save-grade-btn").onclick = async () => {
+                const grade = document.getElementById(`grade-${studentId}`).value;
+                const feedback = document.getElementById(`feedback-${studentId}`).value;
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "classes",
+                        classCode,
+                        "assignments",
+                        assignmentId,
+                        "submissions",
+                        studentId
+                    ),
+                    {
+                        grade,
+                        feedback,
+                        gradedAt: new Date().toISOString()
+                    }
+                );
+
+                alert("✅ Grade saved!");
+                loadRoster(); // update averages when grade changes
+            };
+
+            submissionPanel.appendChild(div);
+        });
+    });
+}
+
+/* ---------- SAVE ASSIGNMENT ---------- */
 saveBtn.onclick = async () => {
-  const data = {
-    title: titleInput.value.trim(),
-    description: descriptionInput.value.trim(),
-    dueDate: typeSelect.value==="assignment"? dueDateInput.value : "",
-    type: typeSelect.value,
-    createdAt: Date.now()
-  };
+    const data = {
+        title: titleInput.value.trim(),
+        description: descriptionInput.value.trim(),
+        dueDate: typeSelect.value === "assignment" ? dueDateInput.value : "",
+        type: typeSelect.value,
+        createdAt: Date.now()
+    };
 
-  if(!data.title || !data.description) return alert("Fill all fields");
+    if (!data.title || !data.description) {
+        alert("Please fill all fields");
+        return;
+    }
 
-  await addDoc(collection(db, "classes", classCode, "assignments"), data);
+    if (editId) {
+        await updateDoc(
+            doc(db, "classes", classCode, "assignments", editId),
+            data
+        );
+        editId = null;
+    } else {
+        await addDoc(assignmentsRef(), data);
+    }
 
-  titleInput.value=""; descriptionInput.value=""; dueDateInput.value="";
+    titleInput.value = "";
+    descriptionInput.value = "";
+    dueDateInput.value = "";
 };
 
-/* ----- Load Roster & Calculate Grade Averages ----- */
+/* ---------- LOAD STUDENT ROSTER ---------- */
 async function loadRoster() {
-  rosterBody.innerHTML = "";
+    rosterBody.innerHTML = "";
 
-  // Get all students with this classCode
-  const profilesSnap = await getDocs(collection(db, "profiles"));
-  const students = [];
-  profilesSnap.forEach(docSnap => {
-    const d = docSnap.data();
-    if(d.classCode === classCode) students.push({ uid: docSnap.id, ...d });
-  });
+    // Find all students with this class code
+    const profilesRef = collection(db, "profiles");
+    const q = query(profilesRef, where("classCode", "==", classCode));
+    const querySnap = await getDocs(q);
 
-  // For each student, calculate average grade
-  for(const student of students) {
-    let grades = [];
-    const assignmentsSnap = await getDocs(collection(db, "classes", classCode, "assignments"));
-    for(const aDoc of assignmentsSnap.docs) {
-      const subSnap = await getDoc(doc(db, "classes", classCode, "assignments", aDoc.id, "submissions", student.uid));
-      if(subSnap.exists()) {
-        const g = subSnap.data().grade;
-        if(g!==undefined && g!=="") grades.push(parseFloat(g));
-      }
+    if (querySnap.empty) {
+        rosterBody.innerHTML = `<tr><td colspan="4">No students enrolled.</td></tr>`;
+        return;
     }
-    const avgGrade = grades.length>0 ? (grades.reduce((a,b)=>a+b,0)/grades.length).toFixed(2) : "N/A";
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${student.firstName} ${student.lastName}</td>
-                    <td>${student.email}</td>
-                    <td>${avgGrade}</td>`;
-    rosterBody.appendChild(tr);
-  }
+    for (const docSnap of querySnap.docs) {
+        const student = docSnap.data();
+        const studentEmail = student.email;
+        let submittedCount = 0;
+        let totalGrade = 0;
+        let gradedCount = 0;
+
+        // Loop all assignments to compute averages
+        const assignmentsSnap = await getDocs(assignmentsRef());
+        for (const assignmentDoc of assignmentsSnap.docs) {
+            const subDoc = await getDoc(doc(
+                db,
+                "classes",
+                classCode,
+                "assignments",
+                assignmentDoc.id,
+                "submissions",
+                docSnap.id
+            ));
+
+            if (subDoc.exists()) {
+                submittedCount++;
+                const grade = parseFloat(subDoc.data().grade);
+                if (!isNaN(grade)) {
+                    totalGrade += grade;
+                    gradedCount++;
+                }
+            }
+        }
+
+        const avgGrade = gradedCount > 0 ? (totalGrade / gradedCount).toFixed(2) : "-";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${student.firstName} ${student.lastName}</td>
+            <td>${studentEmail}</td>
+            <td>${submittedCount}</td>
+            <td>${avgGrade}</td>
+        `;
+
+        rosterBody.appendChild(tr);
+    }
 }
 </script>
+
 </body>
 </html>
