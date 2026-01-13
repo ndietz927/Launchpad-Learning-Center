@@ -108,14 +108,27 @@
   <body>
     <!-- Navbar -->
     <nav class="navbar navbar-dark fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-          <img src="Launchpad Learning Center.png" alt="Logo" />
-          <span class="fw-bold fs-4">Launchpad Teacher Dashboard</span>
-        </a>
-        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
-      </div>
-    </nav>
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="Launchpad Learning Center.png" alt="Logo" />
+      <span class="fw-bold fs-4">Launchpad Teacher Dashboard</span>
+    </a>
+
+    <div class="d-flex gap-2">
+      <button 
+        class="btn btn-outline-light btn-sm"
+        onclick="window.location.href='connections.html'">
+        Skill Share Messaging
+      </button>
+
+      <button id="logoutBtn" class="btn btn-danger btn-sm">
+        Logout
+      </button>
+    </div>
+
+  </div>
+</nav>
+
 
     <!-- Main Content -->
     <div class="container d-flex flex-column align-items-center">
