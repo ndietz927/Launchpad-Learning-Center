@@ -26,20 +26,6 @@
   .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
   .post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
   .submit-btn { margin-top:10px; }
-
-  /* Messaging */
-  .chat-box {
-    background:#111;
-    max-height:300px;
-    overflow-y:auto;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
-  }
-  .chat-msg {
-    border-bottom:1px solid #333;
-    padding:6px 0;
-  }
 </style>
 </head>
 
@@ -101,17 +87,6 @@
 
       <!-- Class Content -->
       <div id="classContentDiv" style="margin-top:30px;"></div>
-
-      <!-- Messaging -->
-      <div id="messageSection" style="display:none; margin-top:30px;">
-        <h4 style="color:#ff8a65;">Class Messages</h4>
-        <div id="chatBox" class="chat-box"></div>
-        <div class="d-flex gap-2">
-          <input id="chatInput" class="form-control" placeholder="Type message..." />
-          <button id="sendBtn" class="btn btn-primary">Send</button>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -121,8 +96,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, collection,
-  onSnapshot, query, where, getDocs,
-  addDoc, orderBy, serverTimestamp
+  onSnapshot, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -144,15 +118,7 @@ const profileForm = document.getElementById("profileForm");
 const logoutBtn = document.getElementById("logoutBtn");
 const classContentDiv = document.getElementById("classContentDiv");
 
-/* Messaging elements */
-const messageSection = document.getElementById("messageSection");
-const chatBox = document.getElementById("chatBox");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-
 let currentClassCode = "";
-let senderName = "";
-let senderRole = "student";
 
 /* Auth */
 onAuthStateChanged(auth, async (user) => {
@@ -173,12 +139,9 @@ onAuthStateChanged(auth, async (user) => {
     age.value = d.age || "";
     classCode.value = d.classCode || "";
 
-    senderName = `${d.firstName || ""} ${d.lastName || ""}`.trim();
-
     if (d.classCode) {
       currentClassCode = d.classCode;
       loadClassContent(currentClassCode, user.uid);
-      initMessaging();
     }
   }
 
@@ -194,11 +157,8 @@ onAuthStateChanged(auth, async (user) => {
       email: user.email
     });
 
-    senderName = `${firstName.value} ${lastName.value}`;
     currentClassCode = classCode.value;
-
     loadClassContent(currentClassCode, user.uid);
-    initMessaging();
     alert("Profile saved!");
   };
 });
@@ -271,27 +231,13 @@ async function loadClassContent(classCode, studentUid) {
       );
 
       onSnapshot(submissionRef, (snap) => {
-  if (snap.exists()) {
-    const sub = snap.data();
-
-    let html = "";
-
-    if (sub.grade) {
-      html += `✅ Grade: <strong>${sub.grade}</strong><br/>`;
-    } else {
-      html += "⏳ Awaiting grade<br/>";
-    }
-
-    if (sub.feedback) {
-      html += `<div class="mt-2" style="color:#ffccbc;">
-                📝 Feedback: ${sub.feedback}
-              </div>`;
-    }
-
-    gradeDiv.innerHTML = html;
-  }
-});
-
+        if (snap.exists()) {
+          const sub = snap.data();
+          gradeDiv.innerHTML = sub.grade
+            ? `✅ Grade: <strong>${sub.grade}</strong>`
+            : "⏳ Awaiting grade";
+        }
+      });
 
       const submitBtn = document.createElement("button");
       submitBtn.className = "btn btn-primary submit-btn";
@@ -317,48 +263,6 @@ async function loadClassContent(classCode, studentUid) {
     });
   });
 }
-
-/* ---------------- MESSAGING SYSTEM ---------------- */
-
-function messagesRef() {
-  return collection(db, "classes", currentClassCode, "messages");
-}
-
-function initMessaging() {
-  if (!currentClassCode) return;
-
-  messageSection.style.display = "block";
-
-  const q = query(messagesRef(), orderBy("timestamp"));
-  onSnapshot(q, (snapshot) => {
-    chatBox.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const m = docSnap.data();
-      const time = m.timestamp?.toDate()?.toLocaleString() || "";
-      chatBox.innerHTML += `
-        <div class="chat-msg">
-          <strong>${m.senderName}</strong>
-          <small class="text-muted">(${m.senderRole} • ${time})</small>
-          <div>${m.message}</div>
-        </div>
-      `;
-    });
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-}
-
-sendBtn.onclick = async () => {
-  if (!chatInput.value || !currentClassCode) return;
-
-  await addDoc(messagesRef(), {
-    senderName,
-    senderRole,
-    message: chatInput.value,
-    timestamp: serverTimestamp()
-  });
-
-  chatInput.value = "";
-};
 </script>
 
 </body>
