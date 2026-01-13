@@ -44,15 +44,24 @@
       .btn-danger:hover {
         background: #b71c1c;
       }
+
+      #rosterTable {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      #rosterTable th, #rosterTable td {
+        border: 1px solid #444;
+        padding: 8px;
+        text-align: center;
+      }
+      #rosterTable th {
+        background-color: #333;
+      }
     </style>
   </head>
 
   <body>
-     
-               
-               
-            
-        </div>
     <nav class="navbar navbar-dark fixed-top">
       <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="#">
@@ -66,51 +75,28 @@
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
       <div class="col-md-6">
         <div class="card p-4 text-center">
-          <h3 class="fw-bold mb-3" style="color: #ff8a65;">viewing users</h3>
-          <p id="adminEmail" class="text-muted mb-4"></p>
-         
+          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Viewing Users</h3>
 
           <div class="d-grid gap-2">
-            
-             <a href="../admin.html" class="btn btn-primary">Home</a>
-            </button>
+            <a href="../admin.html" class="btn btn-primary">Home</a>
 
-            <div class="content-box">
-    <h2>Student Roster</h2>
-    <div id="rosterPanel">
-        <p style="color:#aaa;">Roster will appear here.</p>
-        <table id="rosterTable">
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Email</th>
-                    <th>Assignments Submitted</th>
-                    <th>Average Grade</th>
-                </tr>
-            </thead>
-            <tbody id="rosterBody"></tbody>
-        </table>
-    </div>
-</div>
+            <div class="content-box mt-4">
+              <h2>User Roster</h2>
+              <div id="rosterPanel">
+                <p style="color:#aaa;">Roster will appear here.</p>
+                <table id="rosterTable">
+                  <thead>
+                    <tr>
+                      
+                      <th>Email</th>
+                      <th>Role</th>
+                    </tr>
+                  </thead>
+                  <tbody id="RosterBody"></tbody>
+                </table>
+              </div>
+            </div>
 
-
-            <div class="content-box">
-    <h2>Teacher Roster</h2>
-    <div id="rosterPanel">
-        <p style="color:#aaa;">Roster will appear here.</p>
-        <table id="rosterTable">
-            <thead>
-                <tr>
-                    <th>teacher</th>
-                    <th>Email</th>
-                    <th>Assignments</th>
-                </tr>
-            </thead>
-            <tbody id="rosterBody"></tbody>
-        </table>
-    </div>
-</div>
-          
           </div>
         </div>
       </div>
@@ -118,16 +104,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut
-      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        getDoc
-      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
@@ -139,32 +116,38 @@
       };
 
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
       const db = getFirestore(app);
 
-      const logoutBtn = document.getElementById("logoutBtn");
-      const adminEmail = document.getElementById("adminEmail");
+      const rosterBody = document.getElementById("RosterBody");
 
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-          window.location.href = "index.html";
-          return;
+      async function loadRoster() {
+        rosterBody.innerHTML = "";
+
+        try {
+          const usersSnap = await getDocs(collection(db, "profiles"));
+
+          if (usersSnap.empty) {
+            rosterBody.innerHTML = `<tr><td colspan="3">No users found.</td></tr>`;
+            return;
+          }
+
+          usersSnap.forEach(docSnap => {
+            const user = docSnap.data();
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+             
+              <td>${user.email ?? "-"}</td>
+              <td>${user.role ?? "-"}</td>
+            `;
+            rosterBody.appendChild(tr);
+          });
+        } catch (error) {
+          console.error("Error loading roster:", error);
+          rosterBody.innerHTML = `<tr><td colspan="3">Error loading users.</td></tr>`;
         }
+      }
 
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists() || userDoc.data().role !== "admin") {
-          alert("Access denied. Admins only.");
-          window.location.href = "index.html";
-          return;
-        }
-
-        adminEmail.textContent = `Logged in as: ${user.email}`;
-      });
-
-      logoutBtn.addEventListener("click", async () => {
-        await signOut(auth);
-        window.location.href = "index.html";
-      });
+      loadRoster();
     </script>
   </body>
 </html>
