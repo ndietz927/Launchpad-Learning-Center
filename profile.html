@@ -14,8 +14,11 @@
   .card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,0.3); color:#fff; }
   label { color:#ffb199; font-weight:500; }
   input, select, textarea { background-color:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
+  input::placeholder, textarea::placeholder { color:#aaa; }
   .btn-primary { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; }
+  .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
   .btn-danger { background: #c62828; border:none; }
+  .btn-danger:hover { background:#b71c1c; }
   .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
   .class-btn { margin:5px 5px 5px 0; }
 </style>
@@ -28,12 +31,12 @@
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img src="Launchpad Learning Center.png" />
-      <span class="fw-bold fs-4">Launchpad Learning Center</span>
+      <span class="fw-bold fs-4">Launchpad Student Profile</span>
     </a>
-    <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
-    <button id="connectionsBtn" class="btn btn-outline-light btn-sm">
-  Skill Share Messaging
-</button>
+    <div class="d-flex gap-2">
+      <button id="connectionsBtn" class="btn btn-outline-light btn-sm">Skill Share Messaging</button>
+      <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+    </div>
   </div>
 </nav>
 
@@ -78,27 +81,14 @@
 
       <hr>
 
-     <!-- Join Class -->
-<div class="mb-4">
-  <label class="mb-2">Join a Class</label>
-
-  <input 
-    type="text" 
-    id="newClassCode" 
-    class="form-control mb-2" 
-    placeholder="Enter class code"
-  />
-
-  <button 
-    id="addClassBtn"
-    type="button"
-    class="btn btn-primary w-100"
-    style="border:2px solid #ff8a65; font-weight:bold;"
-  >
-    ➕ Add Class
-  </button>
-</div>
-
+      <!-- Join Class -->
+      <div class="mb-4">
+        <label class="mb-1">Join a Class</label>
+        <div class="input-group">
+          <input type="text" id="newClassCode" class="form-control" placeholder="Enter class code"/>
+          <button id="addClassBtn" type="button" class="btn btn-primary">➕ Add Class</button>
+        </div>
+      </div>
 
       <!-- Class Selector -->
       <div>
@@ -142,9 +132,15 @@ const classContentDiv = document.getElementById("classContentDiv");
 const classList = document.getElementById("classList");
 const addClassBtn = document.getElementById("addClassBtn");
 const newClassCode = document.getElementById("newClassCode");
+const connectionsBtn = document.getElementById("connectionsBtn");
 
 let currentUser;
 let classCodes = [];
+
+/* Skill Share Messaging */
+connectionsBtn.addEventListener("click", () => {
+  window.location.href = "connections.html";
+});
 
 /* Auth */
 onAuthStateChanged(auth, async (user) => {
@@ -152,13 +148,11 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
     return;
   }
-
   currentUser = user;
   userEmail.textContent = `Logged in as: ${user.email}`;
 
   const userRef = doc(db, "profiles", user.uid);
   const snap = await getDoc(userRef);
-
   if (snap.exists()) {
     const d = snap.data();
     firstName.value = d.firstName || "";
@@ -183,20 +177,23 @@ onAuthStateChanged(auth, async (user) => {
   };
 });
 
+/* Logout */
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
+
 /* Add Class */
 addClassBtn.onclick = async () => {
   const code = newClassCode.value.trim();
   if (!code) return;
-
   if (classCodes.includes(code)) {
     alert("Already joined this class.");
     return;
   }
-
   classCodes.push(code);
   newClassCode.value = "";
   renderClassButtons();
-
   await updateDoc(doc(db, "profiles", currentUser.uid), {
     classCodes: arrayUnion(code)
   });
@@ -205,7 +202,6 @@ addClassBtn.onclick = async () => {
 /* Render Class Buttons */
 function renderClassButtons() {
   classList.innerHTML = "";
-
   classCodes.forEach(code => {
     const btn = document.createElement("button");
     btn.className = "btn btn-outline-light btn-sm class-btn";
@@ -215,7 +211,7 @@ function renderClassButtons() {
   });
 }
 
-/* Load Class + Assignments */
+/* Load Class + Assignments + Feedback */
 async function loadClassContent(classCode) {
   classContentDiv.innerHTML = `
     <div id="classHeaderInfo" class="mb-3"></div>
@@ -252,14 +248,11 @@ async function loadClassContent(classCode) {
   `;
 
   const assignmentsRef = collection(db, "classes", classCode, "assignments");
-
   onSnapshot(assignmentsRef, (snapshot) => {
     studentContent.innerHTML = "";
-
     snapshot.forEach((docSnap) => {
       const a = docSnap.data();
       const assignmentId = docSnap.id;
-
       const div = document.createElement("div");
       div.className = "assignment";
       div.innerHTML = `
@@ -270,31 +263,16 @@ async function loadClassContent(classCode) {
       `;
 
       const gradeDiv = div.querySelector(".grade");
-
-      const submissionRef = doc(
-        db, "classes", classCode, "assignments", assignmentId,
-        "submissions", currentUser.uid
-      );
+      const submissionRef = doc(db, "classes", classCode, "assignments", assignmentId, "submissions", currentUser.uid);
 
       onSnapshot(submissionRef, (snap) => {
-  if (!snap.exists()) return;
-
-  const sub = snap.data();
-
-  let gradeText = sub.grade
-    ? `✅ Grade: <strong>${sub.grade}</strong>`
-    : "⏳ Awaiting grade";
-
-  let feedbackText = sub.feedback
-    ? `<div style="margin-top:6px;color:#ffb199;">
-         📝 Feedback: ${sub.feedback}
-       </div>`
-    : `<div style="margin-top:6px;color:#aaa;">
-         📝 No feedback yet
-       </div>`;
-
-  gradeDiv.innerHTML = gradeText + feedbackText;
-});
+        if (snap.exists()) {
+          const sub = snap.data();
+          gradeDiv.innerHTML = sub.grade
+            ? `✅ Grade: <strong>${sub.grade}</strong><br/>Feedback: ${sub.feedback || "No feedback"}`
+            : "⏳ Awaiting grade";
+        }
+      });
 
       const submitBtn = document.createElement("button");
       submitBtn.className = "btn btn-primary btn-sm mt-2";
@@ -308,7 +286,8 @@ async function loadClassContent(classCode) {
           submission,
           submittedAt: new Date().toISOString(),
           studentEmail: currentUser.email,
-          grade: ""
+          grade: "",
+          feedback: ""
         });
 
         alert("Submitted!");
@@ -319,20 +298,7 @@ async function loadClassContent(classCode) {
     });
   });
 }
-
-/* Logout */
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-
-  const connectionsBtn = document.getElementById("connectionsBtn");
-
-connectionsBtn.addEventListener("click", () => {
-  window.location.href = "connections.html";
-});
 </script>
 
 </body>
 </html>
-
