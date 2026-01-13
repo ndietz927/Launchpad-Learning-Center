@@ -325,6 +325,12 @@ logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "index.html";
 };
+
+  const connectionsBtn = document.getElementById("connectionsBtn");
+
+connectionsBtn.addEventListener("click", () => {
+  window.location.href = "connections.html";
+});
 </script>
 
 </body>
