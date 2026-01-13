@@ -329,7 +329,7 @@ function loadSubmissions(assignmentId, title) {
                 );
 
                 alert("✅ Grade saved!");
-                loadRoster();
+                loadRoster(); // update averages when grade changes
             };
 
             submissionPanel.appendChild(div);
@@ -367,18 +367,13 @@ saveBtn.onclick = async () => {
     dueDateInput.value = "";
 };
 
-/* ---------- LOAD STUDENT ROSTER (FIXED FOR MULTI-CLASS) ---------- */
+/* ---------- LOAD STUDENT ROSTER ---------- */
 async function loadRoster() {
     rosterBody.innerHTML = "";
 
+    // Find all students with this class code
     const profilesRef = collection(db, "profiles");
-
-    // ✅ FIX: Use array-contains instead of ==
-    const q = query(
-        profilesRef,
-        where("classCodes", "array-contains", classCode)
-    );
-
+    const q = query(profilesRef, where("classCode", "==", classCode));
     const querySnap = await getDocs(q);
 
     if (querySnap.empty) {
@@ -393,8 +388,8 @@ async function loadRoster() {
         let totalGrade = 0;
         let gradedCount = 0;
 
+        // Loop all assignments to compute averages
         const assignmentsSnap = await getDocs(assignmentsRef());
-
         for (const assignmentDoc of assignmentsSnap.docs) {
             const subDoc = await getDoc(doc(
                 db,
@@ -427,9 +422,12 @@ async function loadRoster() {
         `;
 
         rosterBody.appendChild(tr);
+
+
     }
 }
 </script>
 
 </body>
 </html>
+
