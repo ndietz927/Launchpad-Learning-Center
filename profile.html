@@ -274,13 +274,24 @@ async function loadClassContent(classCode) {
       );
 
       onSnapshot(submissionRef, (snap) => {
-        if (snap.exists()) {
-          const sub = snap.data();
-          gradeDiv.innerHTML = sub.grade
-            ? `✅ Grade: <strong>${sub.grade}</strong>`
-            : "⏳ Awaiting grade";
-        }
-      });
+  if (!snap.exists()) return;
+
+  const sub = snap.data();
+
+  let gradeText = sub.grade
+    ? `✅ Grade: <strong>${sub.grade}</strong>`
+    : "⏳ Awaiting grade";
+
+  let feedbackText = sub.feedback
+    ? `<div style="margin-top:6px;color:#ffb199;">
+         📝 Feedback: ${sub.feedback}
+       </div>`
+    : `<div style="margin-top:6px;color:#aaa;">
+         📝 No feedback yet
+       </div>`;
+
+  gradeDiv.innerHTML = gradeText + feedbackText;
+});
 
       const submitBtn = document.createElement("button");
       submitBtn.className = "btn btn-primary btn-sm mt-2";
