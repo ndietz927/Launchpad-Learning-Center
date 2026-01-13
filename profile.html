@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Launchpad Student Profile</title>
 
-<!-- Bootstrap CSS -->
-<link
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-  rel="stylesheet"
-/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
 <style>
   body { background-color: #0d0d0d; color: #fff; min-height: 100vh; padding:20px;}
@@ -18,14 +14,10 @@
   .card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,0.3); color:#fff; }
   label { color:#ffb199; font-weight:500; }
   input, select, textarea { background-color:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
-  input::placeholder, textarea::placeholder { color:#aaa; }
   .btn-primary { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; }
-  .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
   .btn-danger { background: #c62828; border:none; }
-  .btn-danger:hover { background:#b71c1c; }
   .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
-  .post { border-left:6px solid #6c757d; margin-bottom:10px; padding:10px; border-radius:8px; }
-  .submit-btn { margin-top:10px; }
+  .class-btn { margin:5px 5px 5px 0; }
 </style>
 </head>
 
@@ -35,7 +27,7 @@
 <nav class="navbar navbar-dark fixed-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="Launchpad Learning Center.png" alt="Logo" />
+      <img src="Launchpad Learning Center.png" />
       <span class="fw-bold fs-4">Launchpad Learning Center</span>
     </a>
     <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
@@ -43,13 +35,14 @@
 </nav>
 
 <div style="margin-top:80px;" class="container">
-  <div class="col-md-6 mx-auto">
-    <div class="card p-4 text-center">
-      <h3 class="fw-bold mb-3" style="color:#ff8a65;">Student Profile</h3>
-      <p id="userEmail" class="text-muted mb-4"></p>
+  <div class="col-md-7 mx-auto">
+    <div class="card p-4">
+
+      <h3 class="fw-bold mb-3 text-center" style="color:#ff8a65;">Student Profile</h3>
+      <p id="userEmail" class="text-muted text-center"></p>
 
       <!-- Profile Form -->
-      <form id="profileForm" class="text-start">
+      <form id="profileForm">
         <div class="row">
           <div class="col-md-6 mb-3">
             <label>First Name</label>
@@ -77,16 +70,29 @@
           <input type="number" id="age" class="form-control" required />
         </div>
 
-        <div class="mb-3">
-          <label>Class Code</label>
-          <input type="text" id="classCode" class="form-control" required />
-        </div>
-
         <button class="btn btn-primary w-100">Save Profile</button>
       </form>
 
+      <hr>
+
+      <!-- Join Class -->
+      <div class="mb-3">
+        <label>Add Class Code</label>
+        <div class="d-flex">
+          <input type="text" id="newClassCode" class="form-control me-2" placeholder="Enter class code"/>
+          <button id="addClassBtn" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+
+      <!-- Class Selector -->
+      <div>
+        <h5 style="color:#ff8a65;">My Classes</h5>
+        <div id="classList"></div>
+      </div>
+
       <!-- Class Content -->
       <div id="classContentDiv" style="margin-top:30px;"></div>
+
     </div>
   </div>
 </div>
@@ -96,7 +102,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, collection,
-  onSnapshot, query, where, getDocs
+  onSnapshot, query, where, getDocs, updateDoc, arrayUnion
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -117,8 +123,12 @@ const userEmail = document.getElementById("userEmail");
 const profileForm = document.getElementById("profileForm");
 const logoutBtn = document.getElementById("logoutBtn");
 const classContentDiv = document.getElementById("classContentDiv");
+const classList = document.getElementById("classList");
+const addClassBtn = document.getElementById("addClassBtn");
+const newClassCode = document.getElementById("newClassCode");
 
-let currentClassCode = "";
+let currentUser;
+let classCodes = [];
 
 /* Auth */
 onAuthStateChanged(auth, async (user) => {
@@ -127,7 +137,9 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  currentUser = user;
   userEmail.textContent = `Logged in as: ${user.email}`;
+
   const userRef = doc(db, "profiles", user.uid);
   const snap = await getDoc(userRef);
 
@@ -137,40 +149,58 @@ onAuthStateChanged(auth, async (user) => {
     lastName.value = d.lastName || "";
     grade.value = d.grade || "";
     age.value = d.age || "";
-    classCode.value = d.classCode || "";
-
-    if (d.classCode) {
-      currentClassCode = d.classCode;
-      loadClassContent(currentClassCode, user.uid);
-    }
+    classCodes = d.classCodes || [];
+    renderClassButtons();
   }
 
   profileForm.onsubmit = async (e) => {
     e.preventDefault();
-
     await setDoc(userRef, {
       firstName: firstName.value,
       lastName: lastName.value,
       grade: grade.value,
       age: parseInt(age.value),
-      classCode: classCode.value,
-      email: user.email
+      email: user.email,
+      classCodes
     });
-
-    currentClassCode = classCode.value;
-    loadClassContent(currentClassCode, user.uid);
     alert("Profile saved!");
   };
 });
 
-/* Logout */
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
+/* Add Class */
+addClassBtn.onclick = async () => {
+  const code = newClassCode.value.trim();
+  if (!code) return;
+
+  if (classCodes.includes(code)) {
+    alert("Already joined this class.");
+    return;
+  }
+
+  classCodes.push(code);
+  newClassCode.value = "";
+  renderClassButtons();
+
+  await updateDoc(doc(db, "profiles", currentUser.uid), {
+    classCodes: arrayUnion(code)
+  });
 };
 
-/* Load Class + Teacher + Assignments */
-async function loadClassContent(classCode, studentUid) {
+/* Render Class Buttons */
+function renderClassButtons() {
+  classList.innerHTML = "";
+
+  classCodes.forEach(code => {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-outline-light btn-sm class-btn";
+    btn.textContent = code;
+    btn.onclick = () => loadClassContent(code);
+    classList.appendChild(btn);
+  });
+}
+
+/* Load Class + Assignments */
+async function loadClassContent(classCode) {
   classContentDiv.innerHTML = `
     <div id="classHeaderInfo" class="mb-3"></div>
     <h4 style="color:#ff8a65;">Assignments</h4>
@@ -227,7 +257,7 @@ async function loadClassContent(classCode, studentUid) {
 
       const submissionRef = doc(
         db, "classes", classCode, "assignments", assignmentId,
-        "submissions", studentUid
+        "submissions", currentUser.uid
       );
 
       onSnapshot(submissionRef, (snap) => {
@@ -240,7 +270,7 @@ async function loadClassContent(classCode, studentUid) {
       });
 
       const submitBtn = document.createElement("button");
-      submitBtn.className = "btn btn-primary submit-btn";
+      submitBtn.className = "btn btn-primary btn-sm mt-2";
       submitBtn.textContent = "Submit";
 
       submitBtn.onclick = async () => {
@@ -250,12 +280,11 @@ async function loadClassContent(classCode, studentUid) {
         await setDoc(submissionRef, {
           submission,
           submittedAt: new Date().toISOString(),
-          studentEmail: auth.currentUser.email,
+          studentEmail: currentUser.email,
           grade: ""
         });
 
         alert("Submitted!");
-        submitBtn.disabled = true;
       };
 
       div.appendChild(submitBtn);
@@ -263,6 +292,12 @@ async function loadClassContent(classCode, studentUid) {
     });
   });
 }
+
+/* Logout */
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
 </script>
 
 </body>
