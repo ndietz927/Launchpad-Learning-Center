@@ -1,202 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SkillSwap Admin Dashboard</title>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkillSwap Admin Dashboard</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
-    <style>
-      body {
-        background-color: #0d0d0d;
-        color: #fff;
-        min-height: 100vh;
-      }
-      .navbar {
-        background-color: #1a1a1a !important;
-        box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
-      }
-      .navbar-brand img {
-        width: 120px;
-        margin-right: 14px;
-      }
-      .card {
-        background: #1c1c1c;
-        border-radius: 16px;
-        box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
-        color: #fff;
-      }
-      .btn-primary {
-        background: linear-gradient(135deg, #ff512f, #dd2476);
-        border: none;
-      }
-      .btn-primary:hover {
-        background: linear-gradient(135deg, #dd2476, #ff512f);
-      }
-      .btn-danger {
-        background: #c62828;
-        border: none;
-      }
-      .btn-danger:hover {
-        background: #b71c1c;
-      }
+<style>
+body {
+  background-color:#0d0d0d;
+  color:#fff;
+  min-height:100vh;
+}
+.navbar {
+  background:#1a1a1a;
+  box-shadow:0 2px 10px rgba(255,94,77,.3);
+}
+.card {
+  background:#1c1c1c;
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(221,36,118,.3);
+  color:#fff;
+}
+.btn-primary {
+  background:linear-gradient(135deg,#ff512f,#dd2476);
+  border:none;
+}
+.btn-danger {
+  background:#c62828;
+  border:none;
+}
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-      }
-      th, td {
-        border: 1px solid #444;
-        padding: 8px;
-        text-align: center;
-      }
-      th {
-        background-color: #333;
-      }
-      h4 { color:#ff8a65; }
-    </style>
-  </head>
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th, td {
+  border:1px solid #444;
+  padding:8px;
+  text-align:center;
+}
+th {
+  background:#333;
+}
+</style>
+</head>
 
-  <body>
-    <nav class="navbar navbar-dark fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-          <img src="Launchpad Learning Center.png" alt="Logo" />
-          <span class="fw-bold fs-4">SkillSwap Admin Panel</span>
-        </a>
-        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
-      </div>
-    </nav>
+<body>
 
-    <div class="container pt-5 mt-5 d-flex justify-content-center">
-      <div class="col-md-10">
-        <div class="card p-4 text-center">
-          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Viewing Users</h3>
+<nav class="navbar navbar-dark fixed-top">
+  <div class="container-fluid">
+    <span class="navbar-brand fw-bold fs-4">SkillSwap Admin Panel</span>
+    <a href="../admin.html" class="btn btn-primary btn-sm">Home</a>
+  </div>
+</nav>
 
-          <div class="d-grid gap-2 mb-3">
-            <a href="../admin.html" class="btn btn-primary">Home</a>
-          </div>
+<div class="container mt-5 pt-5">
+  <div class="row justify-content-center">
 
-          <!-- STUDENT ROSTER -->
-          <div class="content-box mt-4">
-            <h4>Student Roster</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Grade</th>
-                  <th>Class Code</th>
-                </tr>
-              </thead>
-              <tbody id="StudentRoster"></tbody>
-            </table>
-          </div>
+    <div class="col-md-10">
+      <div class="card p-4 text-center">
 
-          <!-- TEACHER ROSTER -->
-          <div class="content-box mt-5">
-            <h4>Teacher Roster</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Name</th>
-                  <th>Title</th>
-                </tr>
-              </thead>
-              <tbody id="TeacherRoster"></tbody>
-            </table>
-          </div>
+        <h3 class="mb-4" style="color:#ff8a65;">User Rosters</h3>
 
-        </div>
+        <!-- STUDENTS -->
+        <h4 class="mt-3">Students</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>Class Code</th>
+            </tr>
+          </thead>
+          <tbody id="studentBody"></tbody>
+        </table>
+
+        <!-- TEACHERS -->
+        <h4 class="mt-5">Teachers</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Title</th>
+            </tr>
+          </thead>
+          <tbody id="teacherBody"></tbody>
+        </table>
+
       </div>
     </div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  </div>
+</div>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-        authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-        projectId: "simpleloginapp-a7b53",
-        storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-        messagingSenderId: "410260892945",
-        appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-      };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+  projectId: "simpleloginapp-a7b53",
+  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+  messagingSenderId: "410260892945",
+  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
 
-      const studentBody = document.getElementById("StudentRoster");
-      const teacherBody = document.getElementById("TeacherRoster");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-      /* ---------- LOAD STUDENTS ---------- */
-      async function loadStudents() {
-        studentBody.innerHTML = "";
+const studentBody = document.getElementById("studentBody");
+const teacherBody = document.getElementById("teacherBody");
 
-        try {
-          const snap = await getDocs(collection(db, "profiles"));
+loadStudents();
+loadTeachers();
 
-          if (snap.empty) {
-            studentBody.innerHTML = `<tr><td colspan="4">No students found.</td></tr>`;
-            return;
-          }
+/* ---------- STUDENTS ---------- */
+async function loadStudents(){
+  studentBody.innerHTML = "";
 
-          snap.forEach(docSnap => {
-            const s = docSnap.data();
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${s.email || "-"}</td>
-              <td>${(s.firstName || "") + " " + (s.lastName || "")}</td>
-              <td>${s.grade || "-"}</td>
-              <td>${s.classCode || "-"}</td>
-            `;
-            studentBody.appendChild(tr);
-          });
+  try{
+    const snap = await getDocs(collection(db,"profiles"));
 
-        } catch (err) {
-          console.error("Student load error:", err);
-          studentBody.innerHTML = `<tr><td colspan="4">Error loading students.</td></tr>`;
-        }
-      }
+    if(snap.empty){
+      studentBody.innerHTML = `<tr><td colspan="4">No students found</td></tr>`;
+      return;
+    }
 
-      /* ---------- LOAD TEACHERS ---------- */
-      async function loadTeachers() {
-        teacherBody.innerHTML = "";
+    snap.forEach(doc=>{
+      const s = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${s.email || "-"}</td>
+        <td>${(s.firstName||"") + " " + (s.lastName||"")}</td>
+        <td>${s.grade || "-"}</td>
+        <td>${s.classCode || "-"}</td>
+      `;
+      studentBody.appendChild(tr);
+    });
 
-        try {
-          const snap = await getDocs(collection(db, "teacherProfiles"));
+  }catch(err){
+    console.error("Student load error:",err);
+    studentBody.innerHTML = `<tr><td colspan="4">Error loading students</td></tr>`;
+  }
+}
 
-          if (snap.empty) {
-            teacherBody.innerHTML = `<tr><td colspan="3">No teachers found.</td></tr>`;
-            return;
-          }
+/* ---------- TEACHERS ---------- */
+async function loadTeachers(){
+  teacherBody.innerHTML = "";
 
-          snap.forEach(docSnap => {
-            const t = docSnap.data();
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${t.email || "-"}</td>
-              <td>${(t.firstName || "") + " " + (t.lastName || "")}</td>
-              <td>${t.title || "-"}</td>
-            `;
-            teacherBody.appendChild(tr);
-          });
+  try{
+    const snap = await getDocs(collection(db,"teacherProfiles"));
 
-        } catch (err) {
-          console.error("Teacher load error:", err);
-          teacherBody.innerHTML = `<tr><td colspan="3">Error loading teachers.</td></tr>`;
-        }
-      }
+    if(snap.empty){
+      teacherBody.innerHTML = `<tr><td colspan="3">No teachers found</td></tr>`;
+      return;
+    }
 
-      loadStudents();
-      loadTeachers();
-    </script>
-  </body>
+    snap.forEach(doc=>{
+      const t = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${t.email || "-"}</td>
+        <td>${(t.firstName||"") + " " + (t.lastName||"")}</td>
+        <td>${t.title || "-"}</td>
+      `;
+      teacherBody.appendChild(tr);
+    });
+
+  }catch(err){
+    console.error("Teacher load error:",err);
+    teacherBody.innerHTML = `<tr><td colspan="3">Error loading teachers</td></tr>`;
+  }
+}
+</script>
+
+</body>
 </html>
