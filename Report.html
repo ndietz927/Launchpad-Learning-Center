@@ -1,191 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SkillSwap Admin Dashboard</title>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SkillSwap Admin Dashboard</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
-    <style>
-      body {
-        background-color: #0d0d0d;
-        color: #fff;
-        min-height: 100vh;
-      }
-      .navbar {
-        background-color: #1a1a1a !important;
-        box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
-      }
-      .navbar-brand img {
-        width: 120px;
-        margin-right: 14px;
-      }
-      .card {
-        background: #1c1c1c;
-        border-radius: 16px;
-        box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
-        color: #fff;
-      }
-      .btn-primary {
-        background: linear-gradient(135deg, #ff512f, #dd2476);
-        border: none;
-      }
-      .btn-primary:hover {
-        background: linear-gradient(135deg, #dd2476, #ff512f);
-      }
-      .btn-danger {
-        background: #c62828;
-        border: none;
-      }
-      .btn-danger:hover {
-        background: #b71c1c;
-      }
+<style>
+body {
+  background-color: #0d0d0d;
+  color: #fff;
+  min-height: 100vh;
+}
+.navbar {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
+}
+.navbar-brand img {
+  width: 120px;
+  margin-right: 14px;
+}
+.card {
+  background: #1c1c1c;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
+  color: #fff;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #ff512f, #dd2476);
+  border: none;
+}
+.btn-danger {
+  background: #c62828;
+  border: none;
+}
 
-      #rosterTable {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-      }
-      #rosterTable th, #rosterTable td {
-        border: 1px solid #444;
-        padding: 8px;
-        text-align: center;
-      }
-      #rosterTable th {
-        background-color: #333;
-      }
-    </style>
-  </head>
+#rosterTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+#rosterTable th, #rosterTable td {
+  border: 1px solid #444;
+  padding: 8px;
+  text-align: center;
+}
+#rosterTable th {
+  background-color: #333;
+}
+</style>
+</head>
 
-  <body>
-    <nav class="navbar navbar-dark fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-          <img src="Launchpad Learning Center.png" alt="Logo" />
-          <span class="fw-bold fs-4">SkillSwap Admin Panel</span>
-        </a>
-        <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+<body>
+
+<nav class="navbar navbar-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="Launchpad Learning Center.png" alt="Logo" />
+      <span class="fw-bold fs-4">SkillSwap Admin Panel</span>
+    </a>
+    <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+  </div>
+</nav>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="col-md-9">
+    <div class="card p-4 text-center">
+      <h3 class="fw-bold mb-3" style="color: #ff8a65;">Viewing Users</h3>
+
+      <div class="content-box mt-3">
+        <h4>User Roster</h4>
+
+        <table id="rosterTable">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Name</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="RosterBody"></tbody>
+        </table>
       </div>
-    </nav>
 
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-      <div class="col-md-6">
-        <div class="card p-4 text-center">
-          <h3 class="fw-bold mb-3" style="color: #ff8a65;">Viewing Users</h3>
-
-          <div class="d-grid gap-2">
-            <a href="../admin.html" class="btn btn-primary">Home</a>
-
-            <div class="content-box mt-4">
-              <h2>User Roster</h2>
-              <div id="rosterPanel">
-                <p style="color:#aaa;">Roster will appear here.</p>
-                <table id="rosterTable">
-                  <thead>
-                    <tr>
-                      
-                      <th>Email</th>
-                      <th>Role</th>
-                    </tr>
-                  </thead>
-                  <tbody id="RosterBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
     </div>
+  </div>
+</div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-        authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-        projectId: "simpleloginapp-a7b53",
-        storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-        messagingSenderId: "410260892945",
-        appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-      };
+const firebaseConfig = {
+  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+  projectId: "simpleloginapp-a7b53",
+  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+  messagingSenderId: "410260892945",
+  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-      const rosterBody = document.getElementById("RosterBody");
+const rosterBody = document.getElementById("RosterBody");
 
-      async function loadRoster() {
+async function loadRoster() {
   rosterBody.innerHTML = "";
+  let found = false;
 
   try {
-    const studentSnap = await getDocs(collection(db, "profiles"));
-    const teacherSnap = await getDocs(collection(db, "teacherProfiles"));
+    /* ---------- USERS → subcollection profiles ---------- */
+    const usersSnap = await getDocs(collection(db, "users"));
 
-    if (studentSnap.empty && teacherSnap.empty) {
-      rosterBody.innerHTML = `<tr><td colspan="2">No users found.</td></tr>`;
-      return;
+    for (const userDoc of usersSnap.docs) {
+      const profilesRef = collection(db, "users", userDoc.id, "profiles");
+      const profilesSnap = await getDocs(profilesRef);
+
+      profilesSnap.forEach(p => {
+        found = true;
+        const u = p.data();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${u.email || "-"}</td>
+          <td>${u.role || "student"}</td>
+          <td>${(u.firstName || "") + " " + (u.lastName || "")}</td>
+          <td>users/profiles</td>
+        `;
+        rosterBody.appendChild(tr);
+      });
     }
 
-    // ---- Students ----
-    studentSnap.forEach(docSnap => {
-      const user = docSnap.data();
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${user.email ?? "-"}</td>
-        <td>Student</td>
-      `;
-      rosterBody.appendChild(tr);
-    });
+    /* ---------- TEACHER PROFILES (top-level) ---------- */
+    const teacherSnap = await getDocs(collection(db, "teacherProfiles"));
 
-    // ---- Teachers ----
     teacherSnap.forEach(docSnap => {
-      const user = docSnap.data();
+      found = true;
+      const t = docSnap.data();
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${user.email ?? "-"}</td>
-        <td>Teacher</td>
+        <td>${t.email || "-"}</td>
+        <td>teacher</td>
+        <td>${(t.firstName || "") + " " + (t.lastName || "")}</td>
+        <td>teacherProfiles</td>
       `;
       rosterBody.appendChild(tr);
     });
 
-  } catch (error) {
-    console.error("Error loading roster:", error);
-    rosterBody.innerHTML = `<tr><td colspan="2">Error loading users.</td></tr>`;
+    if (!found) {
+      rosterBody.innerHTML = `<tr><td colspan="4">No users found.</td></tr>`;
+    }
+
+  } catch (err) {
+    console.error("Roster error:", err);
+    rosterBody.innerHTML = `<tr><td colspan="4">Error loading users.</td></tr>`;
   }
 }
 
+loadRoster();
+</script>
 
-        try {
-          const usersSnap = await getDocs(collection(db, "profiles"));
-
-          if (usersSnap.empty) {
-            rosterBody.innerHTML = `<tr><td colspan="3">No users found.</td></tr>`;
-            return;
-          }
-
-          usersSnap.forEach(docSnap => {
-            const user = docSnap.data();
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-             
-              <td>${user.email ?? "-"}</td>
-              <td>${user.role ?? "-"}</td>
-            `;
-            rosterBody.appendChild(tr);
-          });
-        } catch (error) {
-          console.error("Error loading roster:", error);
-          rosterBody.innerHTML = `<tr><td colspan="3">Error loading users.</td></tr>`;
-        }
-      }
-
-      loadRoster();
-    </script>
-  </body>
+</body>
 </html>
