@@ -45,19 +45,20 @@
         background: #b71c1c;
       }
 
-      #rosterTable {
+      table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 10px;
       }
-      #rosterTable th, #rosterTable td {
+      th, td {
         border: 1px solid #444;
         padding: 8px;
         text-align: center;
       }
-      #rosterTable th {
+      th {
         background-color: #333;
       }
+      h4 { color:#ff8a65; }
     </style>
   </head>
 
@@ -72,32 +73,46 @@
       </div>
     </nav>
 
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-      <div class="col-md-6">
+    <div class="container pt-5 mt-5 d-flex justify-content-center">
+      <div class="col-md-10">
         <div class="card p-4 text-center">
           <h3 class="fw-bold mb-3" style="color: #ff8a65;">Viewing Users</h3>
 
-          <div class="d-grid gap-2">
+          <div class="d-grid gap-2 mb-3">
             <a href="../admin.html" class="btn btn-primary">Home</a>
-
-            <div class="content-box mt-4">
-              <h2>User Roster</h2>
-              <div id="rosterPanel">
-                <p style="color:#aaa;">Roster will appear here.</p>
-                <table id="rosterTable">
-                  <thead>
-                    <tr>
-                      
-                      <th>Email</th>
-                      <th>Role</th>
-                    </tr>
-                  </thead>
-                  <tbody id="RosterBody"></tbody>
-                </table>
-              </div>
-            </div>
-
           </div>
+
+          <!-- STUDENT ROSTER -->
+          <div class="content-box mt-4">
+            <h4>Student Roster</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Grade</th>
+                  <th>Class Code</th>
+                </tr>
+              </thead>
+              <tbody id="StudentRoster"></tbody>
+            </table>
+          </div>
+
+          <!-- TEACHER ROSTER -->
+          <div class="content-box mt-5">
+            <h4>Teacher Roster</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Name</th>
+                  <th>Title</th>
+                </tr>
+              </thead>
+              <tbody id="TeacherRoster"></tbody>
+            </table>
+          </div>
+
         </div>
       </div>
     </div>
@@ -118,36 +133,70 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
-      const rosterBody = document.getElementById("RosterBody");
+      const studentBody = document.getElementById("StudentRoster");
+      const teacherBody = document.getElementById("TeacherRoster");
 
-      async function loadRoster() {
-        rosterBody.innerHTML = "";
+      /* ---------- LOAD STUDENTS ---------- */
+      async function loadStudents() {
+        studentBody.innerHTML = "";
 
         try {
-          const usersSnap = await getDocs(collection(db, "profiles"));
+          const snap = await getDocs(collection(db, "profiles"));
 
-          if (usersSnap.empty) {
-            rosterBody.innerHTML = `<tr><td colspan="3">No users found.</td></tr>`;
+          if (snap.empty) {
+            studentBody.innerHTML = `<tr><td colspan="4">No students found.</td></tr>`;
             return;
           }
 
-          usersSnap.forEach(docSnap => {
-            const user = docSnap.data();
+          snap.forEach(docSnap => {
+            const s = docSnap.data();
             const tr = document.createElement("tr");
             tr.innerHTML = `
-             
-              <td>${user.email ?? "-"}</td>
-              <td>${user.role ?? "-"}</td>
+              <td>${s.email || "-"}</td>
+              <td>${(s.firstName || "") + " " + (s.lastName || "")}</td>
+              <td>${s.grade || "-"}</td>
+              <td>${s.classCode || "-"}</td>
             `;
-            rosterBody.appendChild(tr);
+            studentBody.appendChild(tr);
           });
-        } catch (error) {
-          console.error("Error loading roster:", error);
-          rosterBody.innerHTML = `<tr><td colspan="3">Error loading users.</td></tr>`;
+
+        } catch (err) {
+          console.error("Student load error:", err);
+          studentBody.innerHTML = `<tr><td colspan="4">Error loading students.</td></tr>`;
         }
       }
 
-      loadRoster();
+      /* ---------- LOAD TEACHERS ---------- */
+      async function loadTeachers() {
+        teacherBody.innerHTML = "";
+
+        try {
+          const snap = await getDocs(collection(db, "teacherProfiles"));
+
+          if (snap.empty) {
+            teacherBody.innerHTML = `<tr><td colspan="3">No teachers found.</td></tr>`;
+            return;
+          }
+
+          snap.forEach(docSnap => {
+            const t = docSnap.data();
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${t.email || "-"}</td>
+              <td>${(t.firstName || "") + " " + (t.lastName || "")}</td>
+              <td>${t.title || "-"}</td>
+            `;
+            teacherBody.appendChild(tr);
+          });
+
+        } catch (err) {
+          console.error("Teacher load error:", err);
+          teacherBody.innerHTML = `<tr><td colspan="3">Error loading teachers.</td></tr>`;
+        }
+      }
+
+      loadStudents();
+      loadTeachers();
     </script>
   </body>
 </html>
