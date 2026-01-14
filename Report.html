@@ -121,7 +121,45 @@
       const rosterBody = document.getElementById("RosterBody");
 
       async function loadRoster() {
-        rosterBody.innerHTML = "";
+  rosterBody.innerHTML = "";
+
+  try {
+    const studentSnap = await getDocs(collection(db, "profiles"));
+    const teacherSnap = await getDocs(collection(db, "teacherProfiles"));
+
+    if (studentSnap.empty && teacherSnap.empty) {
+      rosterBody.innerHTML = `<tr><td colspan="2">No users found.</td></tr>`;
+      return;
+    }
+
+    // ---- Students ----
+    studentSnap.forEach(docSnap => {
+      const user = docSnap.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${user.email ?? "-"}</td>
+        <td>Student</td>
+      `;
+      rosterBody.appendChild(tr);
+    });
+
+    // ---- Teachers ----
+    teacherSnap.forEach(docSnap => {
+      const user = docSnap.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${user.email ?? "-"}</td>
+        <td>Teacher</td>
+      `;
+      rosterBody.appendChild(tr);
+    });
+
+  } catch (error) {
+    console.error("Error loading roster:", error);
+    rosterBody.innerHTML = `<tr><td colspan="2">Error loading users.</td></tr>`;
+  }
+}
+
 
         try {
           const usersSnap = await getDocs(collection(db, "profiles"));
