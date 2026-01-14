@@ -60,6 +60,27 @@
       .google-btn:hover {
         background-color: #f3f3f3;
       }
+      .footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  border-top: 1px solid rgba(255, 94, 77, 0.3);
+  color: #ccc;
+  font-size: 0.85rem;
+  padding: 10px 0;
+}
+
+.footer span:highlight {
+  color: #ff8a65;
+  font-weight: 600;
+}
+
+.footer-content {
+  text-align: center;
+  line-height: 1.4;
+}
+
     </style>
   </head>
 
@@ -127,5 +148,24 @@
     </div>
 
     <script type="module" src="app.js"></script>
+    <footer>
+  <div class="footer-content">
+    <div>
+      <span class="highlight">Chapter:</span> Your Chapter Name Here
+    </div>
+    <div>
+      <span class="highlight">Members:</span>
+      Name One (ID#000000) &nbsp;|&nbsp; Name Two (ID#000000)
+    </div>
+    <div>
+      <span class="highlight">School:</span> Your School Name
+    </div>
+    <div>
+      <span class="highlight">Location:</span> City, State &nbsp;|&nbsp;
+      <span class="highlight">Year:</span> 2026
+    </div>
+  </div>
+</footer>
+
   </body>
 </html>
