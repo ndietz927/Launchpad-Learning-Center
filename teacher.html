@@ -1,72 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Character encoding -->
     <meta charset="UTF-8" />
+
+    <!-- Responsive layout for mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Page title -->
     <title>Teacher Dashboard</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS for layout, components, and utilities -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
 
     <style>
+      /* Global page styling */
       body {
         background-color: #0d0d0d;
         color: #fff;
         min-height: 100vh;
-        padding-top: 130px; /* ⬆️ Increased to fully show title */
+        padding-top: 130px; /* Space for fixed navbar */
       }
+
+      /* Navbar styling */
       .navbar {
         background-color: #1a1a1a !important;
         box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
       }
+
+      /* Logo size and spacing */
       .navbar-brand img {
         width: 120px;
         margin-right: 14px;
       }
+
+      /* Card appearance */
       .card {
         background: #1c1c1c;
         border-radius: 16px;
         box-shadow: 0 0 25px rgba(221, 36, 118, 0.3);
         color: #fff;
       }
+
+      /* Label styling */
       label {
         color: #ffb199;
         font-weight: 500;
       }
+
+      /* Input and select fields */
       input,
       select {
         background-color: #2b2b2b !important;
         color: #fff !important;
         border: 1px solid #444 !important;
       }
+
+      /* Placeholder text color */
       input::placeholder {
         color: #aaa;
       }
+
+      /* Primary button gradient */
       .btn-primary {
         background: linear-gradient(135deg, #ff512f, #dd2476);
         border: none;
       }
+
+      /* Hover effect for primary button */
       .btn-primary:hover {
         background: linear-gradient(135deg, #dd2476, #ff512f);
       }
+
+      /* Danger (delete/logout) button */
       .btn-danger {
         background: #c62828;
         border: none;
       }
+
       .btn-danger:hover {
         background: #b71c1c;
       }
+
+      /* Outline light buttons */
       .btn-outline-light {
         border-color: #ff8a65;
         color: #ff8a65;
       }
+
       .btn-outline-light:hover {
         background-color: #ff8a65;
         color: #fff;
       }
+
+      /* Class code display box */
       .class-code-box {
         font-size: 1.3rem;
         font-weight: bold;
@@ -77,15 +107,21 @@
         letter-spacing: 2px;
         margin-top: 10px;
       }
+
+      /* Divider between sections */
       .section-divider {
         border-top: 1px solid #ff8a65;
         margin: 40px 0;
         opacity: 0.6;
       }
+
+      /* Scrollable class list */
       .class-list {
         max-height: 300px;
         overflow-y: auto;
       }
+
+      /* Individual class item */
       .class-item {
         background-color: #2b2b2b;
         border-radius: 10px;
@@ -96,9 +132,13 @@
         justify-content: space-between;
         align-items: center;
       }
+
+      /* Class info container */
       .class-info {
         flex: 1;
       }
+
+      /* Highlight class name */
       .class-item strong {
         color: #ffb199;
       }
@@ -106,40 +146,47 @@
   </head>
 
   <body>
-    <!-- Navbar -->
+    <!-- Top navigation bar -->
     <nav class="navbar navbar-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="Launchpad Learning Center.png" alt="Logo" />
-      <span class="fw-bold fs-4">SkillSwap Teacher Dashboard</span>
-    </a>
+      <div class="container-fluid">
+        <!-- Logo and title -->
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <img src="Launchpad Learning Center.png" alt="Logo" />
+          <span class="fw-bold fs-4">SkillSwap Teacher Dashboard</span>
+        </a>
 
-    <div class="d-flex gap-2">
-      <button 
-        class="btn btn-outline-light btn-sm"
-        onclick="window.location.href='connections.html'">
-        Skill Share Messaging
-      </button>
+        <!-- Navbar action buttons -->
+        <div class="d-flex gap-2">
+          <!-- Navigate to messaging page -->
+          <button 
+            class="btn btn-outline-light btn-sm"
+            onclick="window.location.href='connections.html'">
+            Skill Share Messaging
+          </button>
 
-      <button id="logoutBtn" class="btn btn-danger btn-sm">
-        Logout
-      </button>
-    </div>
+          <!-- Logout button -->
+          <button id="logoutBtn" class="btn btn-danger btn-sm">
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
 
-  </div>
-</nav>
-
-
-    <!-- Main Content -->
+    <!-- Main page content -->
     <div class="container d-flex flex-column align-items-center">
       <div class="col-md-6 mt-3">
-        <!-- Teacher Profile Card -->
+
+        <!-- Teacher profile section -->
         <div class="card p-4 text-center mb-4">
           <h3 class="fw-bold mb-3" style="color: #ff8a65;">Teacher Profile</h3>
+
+          <!-- Displays logged-in user email -->
           <p id="userEmail" class="text-white mb-4"></p>
 
+          <!-- Teacher profile form -->
           <form id="teacherProfileForm" class="text-start">
             <div class="row">
+              <!-- Courtesy title -->
               <div class="col-md-4 mb-3">
                 <label for="title">Courtesy Title</label>
                 <select id="title" class="form-select" required>
@@ -151,6 +198,8 @@
                   <option>Prof.</option>
                 </select>
               </div>
+
+              <!-- First name -->
               <div class="col-md-4 mb-3">
                 <label for="firstName">First Name</label>
                 <input
@@ -161,6 +210,8 @@
                   required
                 />
               </div>
+
+              <!-- Last name -->
               <div class="col-md-4 mb-3">
                 <label for="lastName">Last Name</label>
                 <input
@@ -173,20 +224,25 @@
               </div>
             </div>
 
+            <!-- Save profile button -->
             <div class="d-grid gap-2 mt-3">
               <button type="submit" class="btn btn-primary">Save Profile</button>
             </div>
           </form>
+
+          <!-- Profile save status message -->
           <div id="profileStatus" class="mt-3 text-success fw-bold"></div>
         </div>
 
         <div class="section-divider"></div>
 
-        <!-- Class Creation Card -->
+        <!-- Class creation section -->
         <div class="card p-4 text-center mb-4">
           <h3 class="fw-bold mb-3" style="color: #ff8a65;">Create a New Class</h3>
 
+          <!-- Class creation form -->
           <form id="createClassForm" class="text-start">
+            <!-- Class name input -->
             <div class="mb-3">
               <label for="className">Class Name</label>
               <input
@@ -198,11 +254,13 @@
               />
             </div>
 
+            <!-- Generated class code display -->
             <div class="mb-3">
               <label>Generated Class Code</label>
               <div id="classCodeDisplay" class="class-code-box">Click Generate</div>
             </div>
 
+            <!-- Generate and save buttons -->
             <div class="d-flex justify-content-between">
               <button type="button" id="generateCodeBtn" class="btn btn-outline-light">
                 Generate Code
@@ -213,12 +271,13 @@
             </div>
           </form>
 
+          <!-- Class creation status -->
           <div id="classStatusMessage" class="mt-3 text-success fw-bold"></div>
         </div>
 
         <div class="section-divider"></div>
 
-        <!-- My Classes List -->
+        <!-- List of teacher's classes -->
         <div class="card p-4 text-center">
           <h3 class="fw-bold mb-3" style="color: #ff8a65;">My Classes</h3>
           <div id="classList" class="class-list text-start"></div>
@@ -226,8 +285,9 @@
       </div>
     </div>
 
-    <!-- Firebase Script -->
+    <!-- Firebase + application logic -->
     <script type="module">
+      /* Firebase imports */
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
       import {
         getAuth,
@@ -246,6 +306,7 @@
         deleteDoc
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+      /* Firebase configuration */
       const firebaseConfig = {
         apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
         authDomain: "simpleloginapp-a7b53.firebaseapp.com",
@@ -255,10 +316,12 @@
         appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
       };
 
+      /* Initialize Firebase services */
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
+      /* DOM references */
       const userEmail = document.getElementById("userEmail");
       const teacherProfileForm = document.getElementById("teacherProfileForm");
       const profileStatus = document.getElementById("profileStatus");
@@ -269,12 +332,15 @@
       const classList = document.getElementById("classList");
       const logoutBtn = document.getElementById("logoutBtn");
 
+      /* Holds current generated class code */
       let currentCode = "";
 
+      /* Generates a random 8-digit code */
       function generateCode() {
         return Math.floor(10000000 + Math.random() * 90000000).toString();
       }
 
+      /* Ensures class code is unique in Firestore */
       async function generateUniqueCode() {
         let unique = false;
         let code;
@@ -287,14 +353,17 @@
         return code;
       }
 
+      /* Authentication state listener */
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
           window.location.href = "index.html";
           return;
         }
 
+        /* Display logged-in email */
         userEmail.textContent = `Logged in as: ${user.email}`;
 
+        /* Load teacher profile data */
         const profileRef = doc(db, "teacherProfiles", user.uid);
         const profileSnap = await getDoc(profileRef);
         if (profileSnap.exists()) {
@@ -304,15 +373,20 @@
           document.getElementById("lastName").value = data.lastName || "";
         }
 
+        /* Listen for teacher's classes */
         const classesRef = collection(db, "classes");
         const q = query(classesRef, where("teacherEmail", "==", user.email));
         onSnapshot(q, (snapshot) => {
           classList.innerHTML = "";
+
+          /* Show message if no classes exist */
           if (snapshot.empty) {
             classList.innerHTML =
               '<p class="text-muted text-center">No classes created yet.</p>';
             return;
           }
+
+          /* Render each class */
           snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement("div");
@@ -335,7 +409,7 @@
             classList.appendChild(div);
           });
 
-          // Delete buttons
+          /* Delete class handlers */
           document.querySelectorAll(".delete-btn").forEach((btn) => {
             btn.addEventListener("click", async (e) => {
               const code = e.target.getAttribute("data-id");
@@ -345,7 +419,7 @@
             });
           });
 
-          // View Class buttons
+          /* View class handlers */
           document.querySelectorAll(".view-class-btn").forEach((btn) => {
             btn.addEventListener("click", (e) => {
               const code = e.target.getAttribute("data-id");
@@ -355,6 +429,7 @@
         });
       });
 
+      /* Save teacher profile */
       teacherProfileForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
@@ -374,11 +449,13 @@
         profileStatus.textContent = "✅ Profile saved successfully!";
       });
 
+      /* Generate class code */
       generateCodeBtn.addEventListener("click", async () => {
         currentCode = await generateUniqueCode();
         classCodeDisplay.textContent = currentCode;
       });
 
+      /* Save new class */
       createClassForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const className = document.getElementById("className").value.trim();
@@ -402,6 +479,7 @@
         classCodeDisplay.textContent = "Click Generate";
       });
 
+      /* Logout handler */
       logoutBtn.addEventListener("click", async () => {
         await signOut(auth);
         window.location.href = "index.html";
