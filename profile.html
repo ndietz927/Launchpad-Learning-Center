@@ -1,65 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SkillSwap Student Profile</title>
+  <!-- Character encoding -->
+  <meta charset="UTF-8" />
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Responsive scaling for mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-  body { background-color: #0d0d0d; color: #fff; min-height: 100vh; padding:20px;}
-  .navbar { background-color: #1a1a1a !important; box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3); }
-  .navbar-brand img { width:120px; margin-right:14px; }
-  .card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,0.3); color:#fff; }
-  label { color:#ffb199; font-weight:500; }
-  input, select, textarea { background-color:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
-  input::placeholder, textarea::placeholder { color:#aaa; }
-  .btn-primary { background: linear-gradient(135deg,#ff512f,#dd2476); border:none; }
-  .btn-primary:hover { background: linear-gradient(135deg,#dd2476,#ff512f); }
-  .btn-danger { background: #c62828; border:none; }
-  .btn-danger:hover { background:#b71c1c; }
-  .assignment { border-left:6px solid #ff512f; margin-bottom:10px; padding:10px; border-radius:8px; }
-  .class-btn { margin:5px 5px 5px 0; }
-</style>
+  <!-- Page title -->
+  <title>SkillSwap Student Profile</title>
+
+  <!-- Bootstrap CSS for layout and UI components -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <style>
+    /* Global page styling */
+    body {
+      background-color: #0d0d0d;
+      color: #fff;
+      min-height: 100vh;
+      padding:20px;
+    }
+
+    /* Navbar styling */
+    .navbar {
+      background-color: #1a1a1a !important;
+      box-shadow: 0 2px 10px rgba(255, 94, 77, 0.3);
+    }
+
+    /* Logo sizing */
+    .navbar-brand img {
+      width:120px;
+      margin-right:14px;
+    }
+
+    /* Card appearance */
+    .card {
+      background:#1c1c1c;
+      border-radius:16px;
+      box-shadow:0 0 25px rgba(221,36,118,0.3);
+      color:#fff;
+    }
+
+    /* Form label styling */
+    label {
+      color:#ffb199;
+      font-weight:500;
+    }
+
+    /* Inputs, selects, and textareas */
+    input, select, textarea {
+      background-color:#2b2b2b !important;
+      color:#fff !important;
+      border:1px solid #444 !important;
+    }
+
+    /* Placeholder text color */
+    input::placeholder, textarea::placeholder {
+      color:#aaa;
+    }
+
+    /* Primary action button */
+    .btn-primary {
+      background: linear-gradient(135deg,#ff512f,#dd2476);
+      border:none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg,#dd2476,#ff512f);
+    }
+
+    /* Danger buttons (logout) */
+    .btn-danger {
+      background: #c62828;
+      border:none;
+    }
+
+    .btn-danger:hover {
+      background:#b71c1c;
+    }
+
+    /* Assignment card styling */
+    .assignment {
+      border-left:6px solid #ff512f;
+      margin-bottom:10px;
+      padding:10px;
+      border-radius:8px;
+    }
+
+    /* Class selection buttons */
+    .class-btn {
+      margin:5px 5px 5px 0;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
+<!-- Top navigation bar -->
 <nav class="navbar navbar-dark fixed-top">
   <div class="container-fluid">
+    <!-- Logo and title -->
     <a class="navbar-brand d-flex align-items-center" href="#">
       <img src="Launchpad Learning Center.png" />
       <span class="fw-bold fs-4">SkillSwap Student Profile</span>
     </a>
+
+    <!-- Navigation buttons -->
     <div class="d-flex gap-2">
-      <button id="connectionsBtn" class="btn btn-outline-light btn-sm">Skill Share Messaging</button>
+      <!-- Messaging page -->
+      <button id="connectionsBtn" class="btn btn-outline-light btn-sm">
+        Skill Share Messaging
+      </button>
+
+      <!-- Logout -->
       <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
     </div>
   </div>
 </nav>
 
+<!-- Main content container -->
 <div style="margin-top:80px;" class="container">
   <div class="col-md-7 mx-auto">
     <div class="card p-4">
 
+      <!-- Page header -->
       <h3 class="fw-bold mb-3 text-center" style="color:#ff8a65;">Student Profile</h3>
+
+      <!-- Displays logged-in student email -->
       <p id="userEmail" class="text-white text-center"></p>
 
-      <!-- Profile Form -->
+      <!-- Student profile form -->
       <form id="profileForm">
         <div class="row">
+          <!-- First name -->
           <div class="col-md-6 mb-3">
             <label>First Name</label>
             <input type="text" id="firstName" class="form-control" required />
           </div>
+
+          <!-- Last name -->
           <div class="col-md-6 mb-3">
             <label>Last Name</label>
             <input type="text" id="lastName" class="form-control" required />
           </div>
         </div>
 
+        <!-- Grade selection -->
         <div class="mb-3">
           <label>Grade</label>
           <select id="grade" class="form-select" required>
@@ -71,32 +158,39 @@
           </select>
         </div>
 
+        <!-- Age input -->
         <div class="mb-3">
           <label>Age</label>
           <input type="number" id="age" class="form-control" required />
         </div>
 
+        <!-- Save profile -->
         <button class="btn btn-primary w-100">Save Profile</button>
       </form>
 
       <hr>
 
-      <!-- Join Class -->
+      <!-- Join class section -->
       <div class="mb-4">
         <label class="mb-1">Join a Class</label>
         <div class="input-group">
+          <!-- Class code input -->
           <input type="text" id="newClassCode" class="form-control" placeholder="Enter class code"/>
-          <button id="addClassBtn" type="button" class="btn btn-primary">➕ Add Class</button>
+
+          <!-- Add class button -->
+          <button id="addClassBtn" type="button" class="btn btn-primary">
+            ➕ Add Class
+          </button>
         </div>
       </div>
 
-      <!-- Class Selector -->
+      <!-- Student's class list -->
       <div>
         <h5 style="color:#ff8a65;">My Classes</h5>
         <div id="classList"></div>
       </div>
 
-      <!-- Class Content -->
+      <!-- Selected class content -->
       <div id="classContentDiv" style="margin-top:30px;"></div>
 
     </div>
@@ -104,200 +198,235 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import {
-  getFirestore, doc, setDoc, getDoc, collection,
-  onSnapshot, query, where, getDocs, updateDoc, arrayUnion
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  /* Firebase core */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
-  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
-  projectId: "simpleloginapp-a7b53",
-  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
-  messagingSenderId: "410260892945",
-  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
-};
+  /* Firebase authentication */
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+  /* Firestore database tools */
+  import {
+    getFirestore, doc, setDoc, getDoc, collection,
+    onSnapshot, query, where, getDocs, updateDoc, arrayUnion
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-/* Elements */
-const userEmail = document.getElementById("userEmail");
-const profileForm = document.getElementById("profileForm");
-const logoutBtn = document.getElementById("logoutBtn");
-const classContentDiv = document.getElementById("classContentDiv");
-const classList = document.getElementById("classList");
-const addClassBtn = document.getElementById("addClassBtn");
-const newClassCode = document.getElementById("newClassCode");
-const connectionsBtn = document.getElementById("connectionsBtn");
-
-let currentUser;
-let classCodes = [];
-
-/* Skill Share Messaging */
-connectionsBtn.addEventListener("click", () => {
-  window.location.href = "connections.html";
-});
-
-/* Auth */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-  currentUser = user;
-  userEmail.textContent = `Logged in as: ${user.email}`;
-
-  const userRef = doc(db, "profiles", user.uid);
-  const snap = await getDoc(userRef);
-  if (snap.exists()) {
-    const d = snap.data();
-    firstName.value = d.firstName || "";
-    lastName.value = d.lastName || "";
-    grade.value = d.grade || "";
-    age.value = d.age || "";
-    classCodes = d.classCodes || [];
-    renderClassButtons();
-  }
-
-  profileForm.onsubmit = async (e) => {
-    e.preventDefault();
-    await setDoc(userRef, {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      grade: grade.value,
-      age: parseInt(age.value),
-      email: user.email,
-      classCodes
-    });
-    alert("Profile saved!");
+  /* Firebase configuration */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+    authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+    projectId: "simpleloginapp-a7b53",
+    storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+    messagingSenderId: "410260892945",
+    appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
   };
-});
 
-/* Logout */
-logoutBtn.onclick = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
+  /* Initialize Firebase services */
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-/* Add Class */
-addClassBtn.onclick = async () => {
-  const code = newClassCode.value.trim();
-  if (!code) return;
-  if (classCodes.includes(code)) {
-    alert("Already joined this class.");
-    return;
-  }
-  classCodes.push(code);
-  newClassCode.value = "";
-  renderClassButtons();
-  await updateDoc(doc(db, "profiles", currentUser.uid), {
-    classCodes: arrayUnion(code)
+  /* DOM references */
+  const userEmail = document.getElementById("userEmail");
+  const profileForm = document.getElementById("profileForm");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const classContentDiv = document.getElementById("classContentDiv");
+  const classList = document.getElementById("classList");
+  const addClassBtn = document.getElementById("addClassBtn");
+  const newClassCode = document.getElementById("newClassCode");
+  const connectionsBtn = document.getElementById("connectionsBtn");
+
+  /* State variables */
+  let currentUser;
+  let classCodes = [];
+
+  /* Navigate to messaging page */
+  connectionsBtn.addEventListener("click", () => {
+    window.location.href = "connections.html";
   });
-};
 
-/* Render Class Buttons */
-function renderClassButtons() {
-  classList.innerHTML = "";
-  classCodes.forEach(code => {
-    const btn = document.createElement("button");
-    btn.className = "btn btn-outline-light btn-sm class-btn";
-    btn.textContent = code;
-    btn.onclick = () => loadClassContent(code);
-    classList.appendChild(btn);
-  });
-}
-
-/* Load Class + Assignments + Feedback */
-async function loadClassContent(classCode) {
-  classContentDiv.innerHTML = `
-    <div id="classHeaderInfo" class="mb-3"></div>
-    <h4 style="color:#ff8a65;">Assignments</h4>
-    <div id="studentContent"></div>
-  `;
-
-  const headerDiv = document.getElementById("classHeaderInfo");
-  const studentContent = document.getElementById("studentContent");
-
-  const classSnap = await getDoc(doc(db, "classes", classCode));
-  if (!classSnap.exists()) {
-    headerDiv.innerHTML = `<p class="text-danger">Class not found.</p>`;
-    return;
-  }
-
-  const classData = classSnap.data();
-  let teacherName = "Unknown Teacher";
-
-  if (classData.teacherEmail) {
-    const q = query(collection(db, "teacherProfiles"), where("email", "==", classData.teacherEmail));
-    const result = await getDocs(q);
-    if (!result.empty) {
-      const t = result.docs[0].data();
-      teacherName = `${t.title || ""} ${t.firstName || ""} ${t.lastName || ""}`;
+  /* Authentication state listener */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
     }
+
+    currentUser = user;
+    userEmail.textContent = `Logged in as: ${user.email}`;
+
+    /* Load student profile */
+    const userRef = doc(db, "profiles", user.uid);
+    const snap = await getDoc(userRef);
+
+    if (snap.exists()) {
+      const d = snap.data();
+      firstName.value = d.firstName || "";
+      lastName.value = d.lastName || "";
+      grade.value = d.grade || "";
+      age.value = d.age || "";
+      classCodes = d.classCodes || [];
+      renderClassButtons();
+    }
+
+    /* Save profile handler */
+    profileForm.onsubmit = async (e) => {
+      e.preventDefault();
+      await setDoc(userRef, {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        grade: grade.value,
+        age: parseInt(age.value),
+        email: user.email,
+        classCodes
+      });
+      alert("Profile saved!");
+    };
+  });
+
+  /* Logout handler */
+  logoutBtn.onclick = async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  };
+
+  /* Join a new class */
+  addClassBtn.onclick = async () => {
+    const code = newClassCode.value.trim();
+    if (!code) return;
+
+    if (classCodes.includes(code)) {
+      alert("Already joined this class.");
+      return;
+    }
+
+    classCodes.push(code);
+    newClassCode.value = "";
+    renderClassButtons();
+
+    await updateDoc(doc(db, "profiles", currentUser.uid), {
+      classCodes: arrayUnion(code)
+    });
+  };
+
+  /* Render class selection buttons */
+  function renderClassButtons() {
+    classList.innerHTML = "";
+    classCodes.forEach(code => {
+      const btn = document.createElement("button");
+      btn.className = "btn btn-outline-light btn-sm class-btn";
+      btn.textContent = code;
+      btn.onclick = () => loadClassContent(code);
+      classList.appendChild(btn);
+    });
   }
 
-  headerDiv.innerHTML = `
-    <div class="p-3 mb-3" style="background:#222;border-radius:10px;">
-      <strong>Class:</strong> ${classData.name}<br/>
-      <strong>Teacher:</strong> ${teacherName}
-    </div>
-  `;
+  /* Load class details, assignments, and grades */
+  async function loadClassContent(classCode) {
+    classContentDiv.innerHTML = `
+      <div id="classHeaderInfo" class="mb-3"></div>
+      <h4 style="color:#ff8a65;">Assignments</h4>
+      <div id="studentContent"></div>
+    `;
 
-  const assignmentsRef = collection(db, "classes", classCode, "assignments");
-  onSnapshot(assignmentsRef, (snapshot) => {
-    studentContent.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const a = docSnap.data();
-      const assignmentId = docSnap.id;
-      const div = document.createElement("div");
-      div.className = "assignment";
-      div.innerHTML = `
-        <h5>${a.title}</h5>
-        <p>${a.description}</p>
-        <small>Due: ${a.dueDate || "N/A"}</small>
-        <div class="grade mt-2"></div>
-      `;
+    const headerDiv = document.getElementById("classHeaderInfo");
+    const studentContent = document.getElementById("studentContent");
 
-      const gradeDiv = div.querySelector(".grade");
-      const submissionRef = doc(db, "classes", classCode, "assignments", assignmentId, "submissions", currentUser.uid);
+    /* Retrieve class info */
+    const classSnap = await getDoc(doc(db, "classes", classCode));
+    if (!classSnap.exists()) {
+      headerDiv.innerHTML = `<p class="text-danger">Class not found.</p>`;
+      return;
+    }
 
-      onSnapshot(submissionRef, (snap) => {
-        if (snap.exists()) {
-          const sub = snap.data();
-          gradeDiv.innerHTML = sub.grade
-            ? `✅ Grade: <strong>${sub.grade}</strong><br/>Feedback: ${sub.feedback || "No feedback"}`
-            : "⏳ Awaiting grade";
-        }
-      });
+    const classData = classSnap.data();
+    let teacherName = "Unknown Teacher";
 
-      const submitBtn = document.createElement("button");
-      submitBtn.className = "btn btn-primary btn-sm mt-2";
-      submitBtn.textContent = "Submit";
+    /* Retrieve teacher profile */
+    if (classData.teacherEmail) {
+      const q = query(
+        collection(db, "teacherProfiles"),
+        where("email", "==", classData.teacherEmail)
+      );
 
-      submitBtn.onclick = async () => {
-        const submission = prompt("Paste your submission:");
-        if (!submission) return;
+      const result = await getDocs(q);
+      if (!result.empty) {
+        const t = result.docs[0].data();
+        teacherName = `${t.title || ""} ${t.firstName || ""} ${t.lastName || ""}`;
+      }
+    }
 
-        await setDoc(submissionRef, {
-          submission,
-          submittedAt: new Date().toISOString(),
-          studentEmail: currentUser.email,
-          grade: "",
-          feedback: ""
+    /* Display class header */
+    headerDiv.innerHTML = `
+      <div class="p-3 mb-3" style="background:#222;border-radius:10px;">
+        <strong>Class:</strong> ${classData.name}<br/>
+        <strong>Teacher:</strong> ${teacherName}
+      </div>
+    `;
+
+    /* Listen for assignments */
+    const assignmentsRef = collection(db, "classes", classCode, "assignments");
+    onSnapshot(assignmentsRef, (snapshot) => {
+      studentContent.innerHTML = "";
+
+      snapshot.forEach((docSnap) => {
+        const a = docSnap.data();
+        const assignmentId = docSnap.id;
+
+        const div = document.createElement("div");
+        div.className = "assignment";
+        div.innerHTML = `
+          <h5>${a.title}</h5>
+          <p>${a.description}</p>
+          <small>Due: ${a.dueDate || "N/A"}</small>
+          <div class="grade mt-2"></div>
+        `;
+
+        const gradeDiv = div.querySelector(".grade");
+
+        /* Student submission reference */
+        const submissionRef = doc(
+          db,
+          "classes", classCode,
+          "assignments", assignmentId,
+          "submissions", currentUser.uid
+        );
+
+        /* Listen for grade updates */
+        onSnapshot(submissionRef, (snap) => {
+          if (snap.exists()) {
+            const sub = snap.data();
+            gradeDiv.innerHTML = sub.grade
+              ? `✅ Grade: <strong>${sub.grade}</strong><br/>Feedback: ${sub.feedback || "No feedback"}`
+              : "⏳ Awaiting grade";
+          }
         });
 
-        alert("Submitted!");
-      };
+        /* Submit assignment button */
+        const submitBtn = document.createElement("button");
+        submitBtn.className = "btn btn-primary btn-sm mt-2";
+        submitBtn.textContent = "Submit";
 
-      div.appendChild(submitBtn);
-      studentContent.appendChild(div);
+        submitBtn.onclick = async () => {
+          const submission = prompt("Paste your submission:");
+          if (!submission) return;
+
+          await setDoc(submissionRef, {
+            submission,
+            submittedAt: new Date().toISOString(),
+            studentEmail: currentUser.email,
+            grade: "",
+            feedback: ""
+          });
+
+          alert("Submitted!");
+        };
+
+        div.appendChild(submitBtn);
+        studentContent.appendChild(div);
+      });
     });
-  });
-}
+  }
 </script>
 
 </body>
