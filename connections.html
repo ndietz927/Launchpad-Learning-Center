@@ -1,149 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Character encoding -->
-  <meta charset="UTF-8" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skill Share Messaging</title>
 
-  <!-- Makes page responsive on mobile devices -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
-  <!-- Page title shown in browser tab -->
-  <title>Skill Share Messaging</title>
+<style>
+body { background:#0d0d0d; color:#fff; padding-top:90px; }
+.navbar { background:#1a1a1a; box-shadow:0 2px 10px rgba(255,94,77,.3); }
+.card { background:#1c1c1c; border-radius:16px; box-shadow:0 0 25px rgba(221,36,118,.3); }
+input, textarea, select { background:#2b2b2b !important; color:#fff !important; border:1px solid #444 !important; }
+label { color:#ffb199; }
+.btn-primary { background:linear-gradient(135deg,#ff512f,#dd2476); border:none; }
+.user-card { 
+  border-left:5px solid #ff512f; 
+  padding:10px; 
+  margin-bottom:10px; 
+  border-radius:8px; 
+  cursor:pointer; 
+  background:#222; 
+  color: #ffffff;
+  
 
-  <!-- Bootstrap CSS for styling and layout -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+}
 
-  <!-- Custom page styling -->
-  <style>
-    body { background:#0d0d0d; color:#fff; padding-top:90px; }
+.user-card small {
+  color: #cccccc;
+}
 
-    /* Navbar styling */
-    .navbar {
-      background:#1a1a1a;
-      box-shadow:0 2px 10px rgba(255,94,77,.3);
-    }
-
-    /* Card styling */
-    .card {
-      background:#1c1c1c;
-      border-radius:16px;
-      box-shadow:0 0 25px rgba(221,36,118,.3);
-    }
-
-    /* Input styling */
-    input, textarea, select {
-      background:#2b2b2b !important;
-      color:#fff !important;
-      border:1px solid #444 !important;
-    }
-
-    label { color:#ffb199; }
-
-    /* Button styling */
-    .btn-primary {
-      background:linear-gradient(135deg,#ff512f,#dd2476);
-      border:none;
-    }
-
-    /* User list cards */
-    .user-card {
-      border-left:5px solid #ff512f;
-      padding:10px;
-      margin-bottom:10px;
-      border-radius:8px;
-      cursor:pointer;
-      background:#222;
-      color:#ffffff;
-    }
-
-    .user-card small {
-      color:#cccccc;
-    }
-
-    /* Message display box */
-    .message-box {
-      max-height:300px;
-      overflow-y:auto;
-      background:#111;
-      padding:10px;
-      border-radius:10px;
-      color:#fff;
-    }
-
-    .message { margin-bottom:6px; }
-
-    .message strong { color:#ff8a65; }
-
-    /* Placeholder text color */
-    .form-control::placeholder {
-      color:#fff;
-      opacity:1;
-    }
-  </style>
+.message-box { max-height:300px; overflow-y:auto; background:#111; padding:10px; border-radius:10px; color: #fff; }
+.message { margin-bottom:6px; }
+.message strong { color:#ff8a65; }
+ .form-control::placeholder { /* Standard syntax */
+  color: #fff; /* White color */
+  opacity: 1; /* Ensures full opacity in Firefox */
+}
+  
+</style>
 </head>
 
 <body>
 
-<!-- Fixed navigation bar -->
+<!-- Navbar -->
 <nav class="navbar navbar-dark fixed-top">
   <div class="container-fluid">
     <span class="navbar-brand fw-bold fs-4">Skill Share Messaging</span>
-
-    <!-- Back button -->
-    <button onclick="history.back()" class="btn btn-outline-light btn-sm">
-      ⬅ Back
-    </button>
+    <button onclick="history.back()" class="btn btn-outline-light btn-sm">⬅ Back</button>
   </div>
 </nav>
 
 <div class="container">
   <div class="row">
 
-    <!-- Profile setup section -->
+    <!-- Profile Setup -->
     <div class="col-md-4">
       <div class="card p-3 mb-3">
         <h5 style="color:#ff8a65;">My Skill Profile</h5>
 
-        <!-- Role selection -->
         <label class="mt-2">I am a:</label>
         <select id="role" class="form-select">
           <option value="student">Student</option>
           <option value="teacher">Teacher</option>
         </select>
 
-        <!-- User bio -->
         <label class="mt-2">My Interests / Class Description</label>
-        <textarea id="bio" rows="4" class="form-control"
-          placeholder="Example: Robotics, Programming, Algebra tutoring...">
-        </textarea>
+        <textarea id="bio" rows="4" class="form-control" placeholder="Example: Robotics, Programming, Algebra tutoring..."></textarea>
 
-        <!-- Save profile button -->
-        <button id="saveProfileBtn" class="btn btn-primary w-100 mt-3">
-          Save
-        </button>
+        <button id="saveProfileBtn" class="btn btn-primary w-100 mt-3">Save</button>
       </div>
 
-      <!-- List of users -->
+      <!-- Users -->
       <div class="card p-3">
         <h5 style="color:#ff8a65;">People to Connect With</h5>
         <div id="usersList"></div>
       </div>
     </div>
 
-    <!-- Messaging section -->
+    <!-- Messaging -->
     <div class="col-md-8">
       <div class="card p-3">
-        <h5 id="chatTitle" style="color:#ff8a65;">
-          Select someone to chat
-        </h5>
-
-        <!-- Messages appear here -->
+        <h5 id="chatTitle" style="color:#ff8a65;">Select someone to chat</h5>
         <div id="messages" class="message-box mb-3"></div>
 
-        <!-- Message input -->
         <div class="input-group">
-          <input id="messageInput" class="form-control"
-            placeholder="Type message..." />
+          <input id="messageInput" class="text-white form-control" placeholder="Type message..." />
           <button id="sendBtn" class="btn btn-primary">Send</button>
         </div>
       </div>
@@ -152,167 +94,137 @@
   </div>
 </div>
 
-<!-- Firebase + App Logic -->
 <script type="module">
-  /* Import Firebase modules */
-  import { initializeApp } from
-    "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, collection,
+  onSnapshot, addDoc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-  import { getAuth, onAuthStateChanged } from
-    "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyCCotUqgZkDULpRLeyb9lvCma_SYO0CFb0",
+  authDomain: "simpleloginapp-a7b53.firebaseapp.com",
+  projectId: "simpleloginapp-a7b53",
+  storageBucket: "simpleloginapp-a7b53.firebasestorage.app",
+  messagingSenderId: "410260892945",
+  appId: "1:410260892945:web:5339e6de4dbf5cec2cf0b0"
+};
 
-  import {
-    getFirestore, doc, setDoc, getDoc, collection,
-    onSnapshot, addDoc, query, orderBy
-  } from
-    "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  /* Firebase project configuration */
-  const firebaseConfig = {
-    apiKey: "...",
-    authDomain: "...",
-    projectId: "...",
-    storageBucket: "...",
-    messagingSenderId: "...",
-    appId: "..."
-  };
+const roleSelect = document.getElementById("role");
+const bioInput = document.getElementById("bio");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+const usersList = document.getElementById("usersList");
+const messagesDiv = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatTitle = document.getElementById("chatTitle");
 
-  /* Initialize Firebase */
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+let currentUser;
+let selectedUser = null;
+let unsubscribeMessages = null;
 
-  /* Get references to HTML elements */
-  const roleSelect = document.getElementById("role");
-  const bioInput = document.getElementById("bio");
-  const saveProfileBtn = document.getElementById("saveProfileBtn");
-  const usersList = document.getElementById("usersList");
-  const messagesDiv = document.getElementById("messages");
-  const messageInput = document.getElementById("messageInput");
-  const sendBtn = document.getElementById("sendBtn");
-  const chatTitle = document.getElementById("chatTitle");
+/* Auth */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  currentUser = user;
+  loadMyProfile();
+  loadUsers();
+});
 
-  /* Variables for current state */
-  let currentUser;
-  let selectedUser = null;
-  let unsubscribeMessages = null;
+/* Save Profile */
+saveProfileBtn.onclick = async () => {
+  await setDoc(doc(db, "connectionsProfiles", currentUser.uid), {
+    uid: currentUser.uid,
+    email: currentUser.email,
+    role: roleSelect.value,
+    bio: bioInput.value
+  });
+  alert("Profile saved!");
+};
 
-  /* Check if user is logged in */
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "index.html"; // redirect if not logged in
-      return;
-    }
-    currentUser = user;
-    loadMyProfile();
-    loadUsers();
+/* Load My Profile */
+async function loadMyProfile() {
+  const snap = await getDoc(doc(db, "connectionsProfiles", currentUser.uid));
+  if (snap.exists()) {
+    const d = snap.data();
+    roleSelect.value = d.role || "student";
+    bioInput.value = d.bio || "";
+  }
+}
+
+/* Load Users */
+function loadUsers() {
+  const ref = collection(db, "connectionsProfiles");
+  onSnapshot(ref, (snapshot) => {
+    usersList.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const u = docSnap.data();
+      if (u.uid === currentUser.uid) return;
+
+      const div = document.createElement("div");
+      div.className = "user-card";
+      div.innerHTML = `
+        <strong>${u.role.toUpperCase()}</strong><br/>
+        ${u.email}<br/>
+        <small>${u.bio || "No description"}</small>
+      `;
+      div.onclick = () => openChat(u);
+      usersList.appendChild(div);
+    });
+  });
+}
+
+/* Open Chat */
+function openChat(user) {
+  selectedUser = user;
+  chatTitle.textContent = `Chat with ${user.email}`;
+  messagesDiv.innerHTML = "";
+
+  const chatId = [currentUser.uid, user.uid].sort().join("_");
+  const messagesRef = collection(db, "chats", chatId, "messages");
+  const q = query(messagesRef, orderBy("timestamp"));
+
+  if (unsubscribeMessages) unsubscribeMessages();
+
+  unsubscribeMessages = onSnapshot(q, (snapshot) => {
+    messagesDiv.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const m = docSnap.data();
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `
+        <strong>${m.sender}</strong>: ${m.text}
+        <br/><small>${new Date(m.timestamp).toLocaleString()}</small>
+      `;
+      messagesDiv.appendChild(div);
+    });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+}
+
+/* Send Message */
+sendBtn.onclick = async () => {
+  if (!selectedUser || !messageInput.value.trim()) return;
+
+  const chatId = [currentUser.uid, selectedUser.uid].sort().join("_");
+  const messagesRef = collection(db, "chats", chatId, "messages");
+
+  await addDoc(messagesRef, {
+    sender: currentUser.email,
+    text: messageInput.value,
+    timestamp: Date.now()
   });
 
-  /* Save profile to Firestore */
-  saveProfileBtn.onclick = async () => {
-    await setDoc(doc(db, "connectionsProfiles", currentUser.uid), {
-      uid: currentUser.uid,
-      email: currentUser.email,
-      role: roleSelect.value,
-      bio: bioInput.value
-    });
-    alert("Profile saved!");
-  };
-
-  /* Load logged-in user's profile */
-  async function loadMyProfile() {
-    const snap = await getDoc(
-      doc(db, "connectionsProfiles", currentUser.uid)
-    );
-    if (snap.exists()) {
-      const d = snap.data();
-      roleSelect.value = d.role || "student";
-      bioInput.value = d.bio || "";
-    }
-  }
-
-  /* Load all users */
-  function loadUsers() {
-    const ref = collection(db, "connectionsProfiles");
-
-    onSnapshot(ref, (snapshot) => {
-      usersList.innerHTML = "";
-
-      snapshot.forEach((docSnap) => {
-        const u = docSnap.data();
-
-        // Skip current user
-        if (u.uid === currentUser.uid) return;
-
-        const div = document.createElement("div");
-        div.className = "user-card";
-        div.innerHTML = `
-          <strong>${u.role.toUpperCase()}</strong><br/>
-          ${u.email}<br/>
-          <small>${u.bio || "No description"}</small>
-        `;
-
-        // Open chat when clicked
-        div.onclick = () => openChat(u);
-        usersList.appendChild(div);
-      });
-    });
-  }
-
-  /* Open chat with selected user */
-  function openChat(user) {
-    selectedUser = user;
-    chatTitle.textContent = `Chat with ${user.email}`;
-    messagesDiv.innerHTML = "";
-
-    // Unique chat ID
-    const chatId = [currentUser.uid, user.uid].sort().join("_");
-
-    const messagesRef =
-      collection(db, "chats", chatId, "messages");
-
-    const q = query(messagesRef, orderBy("timestamp"));
-
-    // Stop previous listener
-    if (unsubscribeMessages) unsubscribeMessages();
-
-    // Listen for messages in real time
-    unsubscribeMessages = onSnapshot(q, (snapshot) => {
-      messagesDiv.innerHTML = "";
-
-      snapshot.forEach((docSnap) => {
-        const m = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "message";
-        div.innerHTML = `
-          <strong>${m.sender}</strong>: ${m.text}
-          <br/><small>${new Date(m.timestamp).toLocaleString()}</small>
-        `;
-        messagesDiv.appendChild(div);
-      });
-
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-  }
-
-  /* Send a message */
-  sendBtn.onclick = async () => {
-    if (!selectedUser || !messageInput.value.trim()) return;
-
-    const chatId =
-      [currentUser.uid, selectedUser.uid].sort().join("_");
-
-    const messagesRef =
-      collection(db, "chats", chatId, "messages");
-
-    await addDoc(messagesRef, {
-      sender: currentUser.email,
-      text: messageInput.value,
-      timestamp: Date.now()
-    });
-
-    messageInput.value = "";
-  };
+  messageInput.value = "";
+};
 </script>
 
 </body>
