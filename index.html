@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,7 +19,9 @@
         align-items: center;
         justify-content: center;
         color: #fff;
+        flex-direction: column;
       }
+
       .card {
         background: #1c1c1c;
         color: #fff;
@@ -29,64 +31,85 @@
         max-width: 400px;
         width: 100%;
       }
+
       .logo {
         width: 270px;
         margin-bottom: 25px;
       }
+
       .btn-primary {
         background: linear-gradient(135deg, #ff512f, #dd2476);
         border: none;
       }
+
       .btn-primary:hover {
         background: linear-gradient(135deg, #dd2476, #ff512f);
       }
+
       .btn-outline-light {
         border: 1px solid #ff512f;
         color: #ff512f;
       }
+
       .btn-outline-light:hover {
         background-color: #ff512f;
         color: #fff;
       }
+
       .google-btn {
         background-color: #fff;
         color: #222;
         border: none;
       }
+
       .google-btn img {
         width: 22px;
         margin-right: 8px;
       }
+
       .google-btn:hover {
         background-color: #f3f3f3;
       }
+
+      /* 🔥 Clock Styling */
+      #clock {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #ff8a65;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
       footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #111;
-  border-top: 1px solid rgba(255, 94, 77, 0.3);
-  color: #bbb;
-  font-size: 0.7rem; /* smaller font */
-  padding: 6px 0;
-}
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #111;
+        border-top: 1px solid rgba(255, 94, 77, 0.3);
+        color: #bbb;
+        font-size: 0.7rem;
+        padding: 6px 0;
+      }
 
-.footer-content {
-  text-align: center;
-  line-height: 1.3;
-}
+      .footer-content {
+        text-align: center;
+        line-height: 1.3;
+      }
 
-footer span.highlight {
-  color: #ff8a65;
-  font-weight: 600;
-}
-
+      footer span.highlight {
+        color: #ff8a65;
+        font-weight: 600;
+      }
     </style>
   </head>
 
   <body>
-    <div class="container-fluid d-flex justify-content-center align-items-center">
+    <div class="container-fluid d-flex justify-content-center align-items-center flex-column">
+
+      <!-- 🔥 Live Clock -->
+      <div id="clock"></div>
+
       <div class="card p-4 text-center">
         <img
           src="Launchpad Learning Center.png"
@@ -148,25 +171,47 @@ footer span.highlight {
       </div>
     </div>
 
+    <!-- 🔥 Clock Script -->
+    <script>
+      function updateClock() {
+        const now = new Date();
+        const options = { 
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        };
+        document.getElementById("clock").textContent =
+          now.toLocaleString('en-US', options);
+      }
+
+      setInterval(updateClock, 1000);
+      updateClock();
+    </script>
+
     <script type="module" src="app.js"></script>
+
     <footer>
-  <div class="footer-content">
-    <div>
-      <span class="highlight">Chapter:</span> UVCC / Sidney High School
-    </div>
-    <div>
-      <span class="highlight">Members:</span>
-      Nick Dietz (ID#00167749) &nbsp;|&nbsp; Keaton Shaffer (ID#00131482)
-    </div>
-    <div>
-      <span class="highlight">School:</span> Sidney High School
-    </div>
-    <div>
-      <span class="highlight">Location:</span> Sidney, Ohio &nbsp;|&nbsp;
-      <span class="highlight">Year:</span> 2026
-    </div>
-  </div>
-</footer>
+      <div class="footer-content">
+        <div>
+          <span class="highlight">Chapter:</span> UVCC / Sidney High School
+        </div>
+        <div>
+          <span class="highlight">Members:</span>
+          Nick Dietz (ID#00167749) &nbsp;|&nbsp; Keaton Shaffer (ID#00131482)
+        </div>
+        <div>
+          <span class="highlight">School:</span> Sidney High School
+        </div>
+        <div>
+          <span class="highlight">Location:</span> Sidney, Ohio &nbsp;|&nbsp;
+          <span class="highlight">Year:</span> 2026
+        </div>
+      </div>
+    </footer>
 
   </body>
 </html>
